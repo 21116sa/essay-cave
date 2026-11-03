@@ -1,0 +1,2315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breathable Systems · 文献精读工作台</title>
+<style>
+:root{
+  --paper:#f5f2ea;
+  --paper-2:#efeade;
+  --card:#fffdf8;
+  --ink:#1f2328;
+  --ink-2:#3f4650;
+  --muted:#8b8577;
+  --line:#e5dfd1;
+  --line-2:#d8d1c0;
+  --accent:#155e56;
+  --accent-2:#0d3f3a;
+  --accent-soft:#e6efeb;
+  --gold:#a9814a;
+  --danger:#a03a2b;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",STSong,"SimSun",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(900px 500px at 12% -10%,#fbf9f2 0%,rgba(251,249,242,0) 60%),
+                   radial-gradient(800px 420px at 100% 0%,#f2efe4 0%,rgba(242,239,228,0) 55%);
+  font-family:var(--sans);font-size:14px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none;}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:.01em;margin:0;}
+p{margin:0;}
+button{font-family:inherit;}
+::selection{background:#dcebe4;}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;height:66px;display:flex;align-items:center;
+  justify-content:space-between;gap:18px;padding:0 26px;
+  background:rgba(248,245,237,.88);backdrop-filter:saturate(1.2) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;}
+.brand .mark{
+  width:36px;height:36px;flex:none;border-radius:10px;border:1px solid rgba(21,94,86,.35);
+  background:linear-gradient(160deg,#fdfcf7,#e9f0ec);display:grid;place-items:center;color:var(--accent);
+}
+.brand h1{font-size:16.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.brand p{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+.top-actions{display:flex;align-items:center;gap:8px;}
+.save-state{font-size:11.5px;color:var(--muted);white-space:nowrap;margin-right:4px;}
+.save-state b{color:var(--accent);font-weight:600;}
+
+/* ---------- layout ---------- */
+.shell{display:flex;align-items:flex-start;min-height:calc(100vh - 66px);}
+.sidebar{
+  width:292px;flex:none;position:sticky;top:66px;height:calc(100vh - 66px);
+  overflow-y:auto;padding:16px 14px 30px;border-right:1px solid var(--line);
+  background:rgba(250,247,240,.55);
+}
+.sidebar::-webkit-scrollbar{width:8px;}
+.sidebar::-webkit-scrollbar-thumb{background:#dfd8c8;border-radius:8px;border:2px solid transparent;background-clip:content-box;}
+.nav{display:flex;flex-direction:column;gap:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;height:36px;padding:0 11px;border-radius:9px;
+  font-size:13.5px;color:var(--ink-2);cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;
+  user-select:none;
+}
+.nav-item svg{flex:none;opacity:.75;}
+.nav-item:hover{background:rgba(31,35,40,.045);}
+.nav-item.active{
+  background:var(--card);color:var(--accent);font-weight:600;
+  box-shadow:inset 3px 0 0 var(--accent),0 1px 2px rgba(31,35,40,.04);
+}
+.nav-item.active svg{opacity:1;}
+.nav-item .count{margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums;}
+.nav-item.active .count{color:var(--accent);}
+
+.side-sec{margin-top:22px;}
+.side-head{display:flex;align-items:center;justify-content:space-between;padding:0 8px;margin-bottom:8px;}
+.side-head span{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.side-head button{
+  width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink-2);cursor:pointer;display:grid;place-items:center;padding:0;
+}
+.side-head button:hover{border-color:var(--accent);color:var(--accent);}
+.search-wrap{position:relative;margin:0 2px 8px;}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.search-wrap input{
+  width:100%;height:34px;padding:0 10px 0 31px;border-radius:8px;border:1px solid var(--line);
+  background:var(--card);font-size:12.5px;color:var(--ink);outline:none;
+}
+.search-wrap input:focus{border-color:rgba(21,94,86,.5);box-shadow:0 0 0 3px rgba(21,94,86,.07);}
+.paper-list{display:flex;flex-direction:column;gap:3px;}
+.paper-item{padding:9px 10px;border-radius:9px;border:1px solid transparent;cursor:pointer;transition:background .15s,border-color .15s;}
+.paper-item:hover{background:rgba(255,255,255,.65);}
+.paper-item.active{background:var(--card);border-color:var(--line);box-shadow:0 1px 2px rgba(31,35,40,.035);}
+.paper-item .t{
+  font-size:12.8px;line-height:1.45;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.paper-item .m{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:10.5px;color:var(--muted);white-space:nowrap;min-width:0;}
+.paper-item .m .st{flex:none;}
+.paper-item .m .sec{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;color:#a29a87;}
+.paper-item .m .sec::before{content:"· ";color:#bdb5a3;}
+.paper-item .m .time{flex:none;margin-left:auto;color:#a29a87;}
+.paper-item .dot{width:6px;height:6px;border-radius:50%;background:#b9b2a2;flex:none;}
+.dot.st-reading{background:#b98b3a;}
+.dot.st-read{background:#3f7f6f;}
+.dot.st-final{background:#155e56;}
+.dot.st-pause{background:#b0a99a;}
+.side-foot{margin-top:20px;padding:12px 10px 0;border-top:1px solid var(--line);font-size:10.5px;color:var(--muted);line-height:1.7;}
+
+/* ---------- main ---------- */
+main{flex:1;min-width:0;max-width:1080px;margin:0 auto;padding:34px 46px 90px;}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px;}
+.eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:7px;}
+.page-title{font-size:27px;line-height:1.3;}
+.page-sub{font-size:12.5px;color:var(--muted);margin-top:7px;max-width:640px;}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:9px;
+  border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);
+  font-size:12.5px;cursor:pointer;white-space:nowrap;transition:all .15s;text-decoration:none;
+}
+.btn:hover{border-color:rgba(21,94,86,.45);color:var(--accent);background:#fffefb;}
+.btn svg{flex:none;}
+.btn.primary{background:linear-gradient(180deg,#1a6a60,#14574f);border-color:#124d46;color:#f6fbf8;box-shadow:0 1px 2px rgba(13,63,58,.25);}
+.btn.primary:hover{background:linear-gradient(180deg,#1d7368,#156055);color:#fff;}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted);}
+.btn.ghost:hover{background:rgba(31,35,40,.05);color:var(--ink);}
+.btn.danger{color:var(--danger);border-color:#e6cfc8;}
+.btn.danger:hover{background:#fbf1ee;border-color:#d9b3a8;color:var(--danger);}
+.btn.sm{height:28px;padding:0 9px;font-size:11.5px;border-radius:7px;}
+.icon-btn{
+  width:28px;height:28px;border:none;background:transparent;border-radius:7px;color:var(--muted);
+  display:grid;place-items:center;cursor:pointer;padding:0;transition:all .15s;
+}
+.icon-btn:hover{background:rgba(31,35,40,.06);color:var(--ink);}
+.icon-btn.danger:hover{background:#f8eae6;color:var(--danger);}
+
+/* ---------- surfaces ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(31,35,40,.025);}
+.card.tight{padding:16px 18px;}
+.card + .card{margin-top:14px;}
+.hero{
+  position:relative;overflow:hidden;border-radius:16px;padding:32px 34px;margin-bottom:16px;
+  background:linear-gradient(135deg,#fcfaf3 0%,#f2eee1 55%,#e9efe9 100%);
+  border:1px solid var(--line);
+}
+.hero::after{
+  content:"";position:absolute;right:-40px;top:-60px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(21,94,86,.09),rgba(21,94,86,0) 70%);
+}
+.hero h2{font-size:25px;line-height:1.4;max-width:620px;}
+.hero p{font-size:12.5px;color:var(--ink-2);margin-top:10px;max-width:620px;line-height:1.85;}
+.hero .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.stat{padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,253,248,.7);}
+.stat b{display:block;font-family:var(--serif);font-size:24px;line-height:1.2;color:var(--ink);}
+.stat span{font-size:11px;color:var(--muted);letter-spacing:.03em;}
+.stat.accent b{color:var(--accent);}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:4px 0 22px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:9px 14px;font-size:12.8px;color:var(--muted);cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;
+  background:none;border-top:none;border-left:none;border-right:none;
+}
+.tab:hover{color:var(--ink);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.tab .idx{font-family:var(--serif);font-size:11px;margin-right:4px;opacity:.75;}
+
+/* ---------- forms ---------- */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field > label{font-size:11px;letter-spacing:.07em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;}
+.field > label em{font-style:normal;color:#b3ab99;font-size:10.5px;}
+input[type=text],input[type=url],textarea,select{
+  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fcfbf6;
+  font-family:var(--sans);font-size:13.2px;line-height:1.7;color:var(--ink);outline:none;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+input[type=text]:focus,input[type=url]:focus,textarea:focus,select:focus{
+  border-color:rgba(21,94,86,.5);background:#fff;box-shadow:0 0 0 3px rgba(21,94,86,.075);
+}
+input::placeholder,textarea::placeholder{color:#b6afa0;}
+textarea{resize:vertical;min-height:78px;}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#8b8577 50%),linear-gradient(135deg,#8b8577 50%,transparent 50%);
+  background-position:calc(100% - 15px) 55%,calc(100% - 10px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+/* ---------- question blocks ---------- */
+.q-block{padding:18px 0;border-bottom:1px dashed var(--line);}
+.q-block:first-of-type{padding-top:4px;}
+.q-block:last-of-type{border-bottom:none;padding-bottom:4px;}
+.q-head{display:flex;gap:10px;align-items:flex-start;}
+.q-num{
+  width:23px;height:23px;flex:none;border-radius:50%;border:1px solid rgba(21,94,86,.32);color:var(--accent);
+  display:grid;place-items:center;font-family:var(--serif);font-size:11px;margin-top:2px;
+}
+.q-label{font-size:14.5px;font-weight:600;line-height:1.55;color:var(--ink);}
+.q-hint{font-size:11.8px;color:var(--muted);line-height:1.7;padding-left:33px;margin:5px 0 9px;}
+.q-body{padding-left:33px;}
+.q-body textarea{min-height:74px;}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:#faf7ef;color:var(--ink-2);white-space:nowrap;}
+.badge.ok{background:#e9f3ee;border-color:#c8e0d4;color:#1c6350;}
+.badge.mid{background:#fbf3e2;border-color:#ecd9b7;color:#8a621c;}
+.badge.neutral{background:#f2f0ea;border-color:#e0dbcd;color:#6f695c;}
+.badge.no{background:#faeeea;border-color:#eccfc5;color:#9a4030;}
+.badge.bad{background:#f7e6e2;border-color:#e2bdb2;color:#8e2f1f;}
+.badge.gold{background:#f8f0e1;border-color:#e7d4b3;color:#8a6329;}
+.badge.plain{background:transparent;}
+
+/* ---------- progress ---------- */
+.prog{height:6px;border-radius:999px;background:#eae4d6;overflow:hidden;}
+.prog > i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#1b6a5f,#4f9c8a);transition:width .35s;}
+.prog-row{display:flex;align-items:center;gap:12px;}
+.prog-row .prog{flex:1;}
+.prog-row b{font-size:12px;color:var(--accent);font-variant-numeric:tabular-nums;min-width:34px;text-align:right;}
+.step-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.step-pill{font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:rgba(255,255,255,.5);}
+.step-pill.done{color:var(--accent);border-color:#c8ded6;background:#ecf4f0;}
+
+/* ---------- paper view ---------- */
+.paper-title{font-size:28px;line-height:1.38;margin-top:2px;}
+.paper-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:9px;}
+.paper-meta span{display:inline-flex;align-items:center;gap:4px;}
+.paper-meta span + span::before{content:"·";margin-right:12px;color:#c3baa6;}
+.paper-top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;}
+.paper-top .page-actions{padding-top:4px;}
+.prog-card{margin:18px 0 20px;padding:14px 18px;border:1px solid var(--line);border-radius:12px;background:rgba(255,253,248,.6);}
+
+/* ---------- detail blocks ---------- */
+.block-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.block-head h3{font-size:16px;line-height:1.4;}
+.block-head .sub{font-size:11.5px;color:var(--muted);margin-top:3px;font-family:var(--sans);}
+.divider{height:1px;background:var(--line);margin:20px 0;}
+.mini-list{display:flex;flex-direction:column;gap:8px;}
+.mini-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fdfbf5;font-size:12.5px;cursor:pointer;}
+.mini-row:hover{border-color:rgba(21,94,86,.35);}
+.mini-row .ok{width:16px;height:16px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:#fff;font-size:9px;flex:none;}
+.mini-row .ok.on{background:var(--accent);border-color:var(--accent);}
+.mini-row .go{margin-left:auto;color:var(--muted);font-size:11px;}
+
+.item-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fdfbf6;margin-bottom:12px;}
+.item-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.item-head .idx{font-family:var(--serif);font-size:12px;color:var(--gold);letter-spacing:.06em;flex:none;white-space:nowrap;}
+.item-head .grow{flex:1;}
+.item-tools{display:flex;gap:2px;}
+.item-card .field{margin-bottom:11px;}
+.item-card .field:last-child{margin-bottom:0;}
+.item-card textarea{min-height:68px;background:#fffdf8;}
+.item-head .figure-ref{width:120px;flex:none;}
+.verdict-select{width:118px;height:32px;font-size:11.5px;padding:6px 26px 6px 9px;}
+
+/* ---------- table ---------- */
+.table-wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;background:var(--card);}
+table.ev{width:100%;border-collapse:collapse;min-width:820px;table-layout:fixed;}
+table.ev th:nth-child(1),table.ev td:nth-child(1){width:8%;}
+table.ev th:nth-child(2),table.ev td:nth-child(2){width:24%;}
+table.ev th:nth-child(3),table.ev td:nth-child(3){width:33%;}
+table.ev th:nth-child(4),table.ev td:nth-child(4){width:10%;}
+table.ev th:nth-child(5),table.ev td:nth-child(5){width:9%;}
+table.ev th:nth-child(6),table.ev td:nth-child(6){width:16%;}
+table.ev td{overflow-wrap:anywhere;}
+table.ev th{
+  text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:500;padding:10px 12px;border-bottom:1px solid var(--line);background:#faf7ef;white-space:nowrap;
+}
+table.ev td{padding:11px 12px;border-bottom:1px solid #efeade;font-size:12.5px;vertical-align:top;}
+table.ev tr:last-child td{border-bottom:none;}
+table.ev tbody tr:hover{background:#fbf9f3;cursor:pointer;}
+table.ev td.claim{min-width:200px;font-weight:500;}
+table.ev td.evidence{color:var(--ink-2);white-space:pre-wrap;}
+
+/* ---------- guide ---------- */
+.guide-step{display:grid;grid-template-columns:64px 1fr;gap:18px;padding:24px 0;border-bottom:1px solid var(--line);}
+.guide-step:last-child{border-bottom:none;}
+.guide-num{font-family:var(--serif);font-size:34px;line-height:1;color:var(--gold);opacity:.85;}
+.guide-step h3{font-size:18px;margin-bottom:4px;}
+.guide-step .lead{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
+.guide-step p{font-size:13.2px;line-height:1.9;color:var(--ink-2);}
+.guide-step p + p{margin-top:9px;}
+.q-list{counter-reset:q;display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.q-list .qi{display:flex;gap:10px;font-size:13px;color:var(--ink);background:#fbf8f0;border:1px solid var(--line);border-radius:9px;padding:9px 12px;line-height:1.7;}
+.q-list .qi b{font-family:var(--serif);color:var(--accent);font-weight:600;flex:none;}
+.quote{border-left:2px solid var(--gold);padding:2px 0 2px 14px;color:var(--ink-2);font-family:var(--serif);font-size:13.5px;line-height:1.9;margin:12px 0;}
+details.note{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fcfaf4;margin:12px 0;}
+details.note summary{cursor:pointer;font-size:12.8px;color:var(--accent);font-weight:500;}
+details.note > div{margin-top:10px;font-size:12.8px;line-height:1.9;color:var(--ink-2);}
+details.note > div p + p{margin-top:8px;}
+.example-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;}
+.example-table th,.example-table td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;line-height:1.7;}
+.example-table th{background:#faf7ef;font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.05em;white-space:nowrap;}
+.depth-row{display:grid;grid-template-columns:130px 90px 1fr;gap:10px;align-items:start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.8px;}
+.depth-row:last-child{border-bottom:none;}
+
+/* ---------- empty ---------- */
+.empty{
+  border:1px dashed var(--line-2);border-radius:14px;padding:48px 24px;text-align:center;
+  background:rgba(255,253,248,.5);
+}
+.empty h3{font-size:17px;color:var(--ink-2);margin-bottom:6px;}
+.empty p{font-size:12.5px;color:var(--muted);max-width:420px;margin:0 auto 16px;line-height:1.8;}
+
+/* ---------- versions ---------- */
+.version{border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:10px;padding:12px 14px;background:#fdfbf6;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.version .v-label{font-family:var(--serif);font-size:13px;color:var(--ink);}
+.version .v-time{font-size:11px;color:var(--muted);}
+.version .v-tools{margin-left:auto;display:flex;gap:2px;}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed;left:50%;bottom:30px;transform:translate(-50%,10px);z-index:200;
+  background:#20242a;color:#f7f4ec;padding:10px 18px;border-radius:10px;font-size:12.5px;
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;box-shadow:0 8px 26px rgba(0,0,0,.22);
+  max-width:80vw;
+}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* ---------- misc ---------- */
+.muted{color:var(--muted);}
+.small{font-size:11.5px;}
+.hint-line{font-size:11.5px;color:var(--muted);line-height:1.75;}
+.kv{display:flex;gap:10px;font-size:12.5px;line-height:1.8;}
+.kv dt{color:var(--muted);min-width:66px;flex:none;}
+.kv dd{margin:0;}
+.print-only{display:none;}
+.menu-btn{display:none;}
+
+@media (max-width:1180px){
+  main{padding:28px 30px 80px;}
+}
+@media (max-width:980px){
+  .menu-btn{display:grid;}
+  .sidebar{
+    position:fixed;left:0;top:66px;z-index:45;transform:translateX(-102%);transition:transform .22s ease;
+    background:#faf7f0;box-shadow:12px 0 30px rgba(31,35,40,.09);
+  }
+  .sidebar.open{transform:none;}
+  main{padding:24px 20px 80px;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .guide-step{grid-template-columns:44px 1fr;gap:14px;}
+  .guide-num{font-size:26px;}
+  .paper-title{font-size:23px;}
+  .paper-top{flex-direction:column;}
+  .hero{padding:24px 22px;}
+  .hero h2{font-size:21px;}
+}
+/* ---------- library ---------- */
+.tip-line{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:9px 14px;margin-bottom:14px;border:1px solid #e8d8ba;background:#faf2e2;border-radius:10px;
+  font-size:12px;color:#7d5f2c;
+}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 12px;}
+.section-title h3{font-size:16px;}
+.paper-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(272px,100%),1fr));gap:14px;}
+.paper-card{cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;padding:18px 20px;}
+.paper-card:hover{border-color:rgba(21,94,86,.35);box-shadow:0 3px 14px rgba(31,35,40,.06);transform:translateY(-1px);}
+.pcard-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.pcard-title{font-size:14.5px;line-height:1.55;margin-top:9px;font-family:var(--sans);font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.pcard-meta{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.6;}
+.pcard-sec{font-size:10.5px;color:var(--gold);margin-top:8px;letter-spacing:.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pcard-foot{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.pcard-foot .prog{flex:1;}
+.flow-card{margin-top:16px;}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;}
+.flow-item{display:flex;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfaf4;}
+.flow-no{font-family:var(--serif);font-size:12px;color:var(--gold);padding-top:1px;}
+.flow-item b{display:block;font-size:12.5px;font-weight:600;margin-bottom:2px;}
+.flow-item span:not(.flow-no){display:block;font-size:10.8px;color:var(--muted);line-height:1.55;}
+
+/* ---------- paper overview ---------- */
+.chain-row{display:grid;grid-template-columns:26px 176px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);}
+.chain-row:last-child{border-bottom:none;}
+.chain-no{font-family:var(--serif);font-size:11px;color:var(--gold);}
+.chain-row label{font-size:12px;color:var(--muted);}
+.chain-row input{height:34px;padding:6px 10px;font-size:12.8px;}
+
+/* ---------- outline ---------- */
+.outline-sec{margin-bottom:14px;}
+.outline-head{display:flex;align-items:center;gap:14px;padding-bottom:12px;border-bottom:1px solid var(--line);}
+.outline-no{font-family:var(--serif);font-size:28px;color:var(--gold);line-height:1;width:36px;flex:none;}
+.outline-title{flex:1;min-width:0;}
+.outline-title h3{font-size:15.5px;line-height:1.45;}
+.outline-title p{font-size:11px;color:var(--muted);margin-top:2px;}
+.outline-sub{padding:11px 0;border-bottom:1px dashed var(--line);}
+.outline-sub:last-child{border-bottom:none;padding-bottom:2px;}
+.os-head{display:flex;align-items:baseline;gap:10px;}
+.os-no{font-family:var(--serif);font-size:11px;color:var(--accent);flex:none;min-width:26px;}
+.os-title{font-size:12.8px;color:var(--ink);line-height:1.6;flex:1;}
+.os-count{font-size:10.5px;color:var(--muted);white-space:nowrap;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:36px;}
+.chip{font-size:11px;color:var(--ink-2);background:#fbf8f0;border:1px solid var(--line);border-radius:6px;
+  padding:3px 8px;cursor:pointer;max-width:330px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s;}
+.chip:hover{border-color:rgba(21,94,86,.4);color:var(--accent);background:#f4f8f5;}
+.chip.more{color:var(--muted);cursor:default;}
+
+/* ---------- evidence ---------- */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+.filter-bar select{width:200px;max-width:230px;height:34px;padding:4px 28px 4px 10px;font-size:12px;}
+.filter-bar input{flex:1;min-width:180px;height:34px;font-size:12.5px;}
+.filter-bar #evCount{white-space:nowrap;}
+
+/* ---------- archive ---------- */
+.archive-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.archive-card{padding:18px 20px;}
+.archive-sum{font-size:12.5px;color:var(--ink-2);line-height:1.85;margin-top:8px;}
+
+/* ---------- final tab ---------- */
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.check-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fcfaf4;cursor:pointer;}
+.check-item:hover{border-color:rgba(21,94,86,.3);}
+.check-item .box{width:16px;height:16px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:#fff;flex:none;}
+.check-item.done .box{background:var(--accent);border-color:var(--accent);}
+.ci-label{font-size:12.5px;flex:1;}
+.version-view{border-color:#e7d4b3;background:#fffdf6;}
+.version-pre{
+  margin:0;padding:16px 18px;background:#fbf8ef;border:1px solid var(--line);border-radius:10px;
+  font-family:"Cascadia Mono",Consolas,"Courier New",monospace;font-size:11.5px;line-height:1.85;color:var(--ink-2);
+  max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+}
+
+/* ---------- guide extras ---------- */
+.protocol-card{padding:20px 24px;background:linear-gradient(135deg,#fdfbf4,#f4f1e5);}
+.protocol-flow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--serif);font-size:15px;color:var(--ink);}
+.protocol-flow i{font-style:normal;color:var(--gold);}
+.protocol-note{font-size:11.5px;color:var(--muted);margin-top:10px;}
+.logic-list{display:flex;flex-direction:column;gap:2px;}
+.logic-list > div{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;}
+.logic-list > div:last-child{border-bottom:none;}
+.logic-list b{font-family:var(--serif);font-size:11px;color:var(--gold);flex:none;width:20px;}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.rules > div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fcfaf4;}
+.rules b{display:block;font-family:var(--serif);font-size:12px;color:var(--accent);margin-bottom:5px;}
+.rules p{font-size:12px;color:var(--ink-2);line-height:1.8;}
+
+/* ---------- settings ---------- */
+.q-edit{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line);}
+.q-edit:last-child{border-bottom:none;}
+.q-edit-fields{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0;}
+.q-edit-fields input[type=text]{height:33px;padding:5px 10px;font-size:12.8px;}
+.q-edit-fields .hint-input{font-size:11.3px;color:var(--muted);background:transparent;border-color:transparent;padding-left:2px;}
+.q-edit-fields .hint-input:focus{background:#fff;border-color:rgba(21,94,86,.4);}
+.sub-head{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:4px 0 2px;font-family:var(--sans);font-weight:500;}
+.data-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.data-item{padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfaf4;}
+.data-item b{display:block;font-family:var(--serif);font-size:19px;line-height:1.3;color:var(--ink);}
+.data-item span{font-size:10.5px;color:var(--muted);}
+.settings-outline{display:flex;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px;}
+.settings-outline:last-child{border-bottom:none;}
+.settings-outline b{font-family:var(--serif);color:var(--gold);font-size:11px;width:16px;flex:none;}
+.settings-outline span:nth-child(2){flex:1;color:var(--ink-2);}
+
+
+@media (max-width:980px){
+  .save-state{display:none;}
+  .topbar{padding:0 14px;gap:10px;}
+  .brand h1{font-size:15px;}
+  .brand p{display:none;}
+  .brand .mark{width:32px;height:32px;}
+  .brand > div:last-child{min-width:0;}
+  .top-actions{gap:6px;}
+}
+@media (max-width:560px){
+  .top-actions .btn{display:none;}
+  .paper-meta span + span::before{content:none;margin:0;}
+  .paper-title{font-size:21px;}
+  .page-title{font-size:23px;}
+  .hero h2{font-size:20px;}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .flow-item{min-width:0;}
+  .item-head{gap:6px;}
+  .item-head .figure-ref{width:96px;}
+  .item-head .verdict-select{width:100px;}
+}
+
+@media print{
+  body{background:#fff;}
+  .topbar,.sidebar,.tabs,.page-actions,.no-print,#toast,.menu-btn{display:none !important;}
+  main{max-width:none;padding:0;}
+  .print-only{display:block !important;}
+  .card,.item-card,.version{box-shadow:none;break-inside:avoid;}
+  .print-only h1{font-size:22px;margin-bottom:6px;}
+  .print-only h2{font-size:15px;margin:18px 0 6px;padding-bottom:4px;border-bottom:1px solid #ddd;}
+  .print-only h3{font-size:13px;margin:12px 0 4px;}
+  .print-only p{font-size:12px;line-height:1.8;}
+}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <button class="icon-btn menu-btn" data-action="toggle-sidebar" title="展开文献库" aria-label="展开文献库">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="mark" aria-hidden="true">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14Z"/><path d="M5 19c3-3.2 6.2-5.4 9.4-6.4"/><path d="M9.5 9.5h.01M13 7.5h.01M7.5 13h.01"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Breathable Systems</h1>
+      <p>文献精读工作台 · Literature Workbench</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <div class="save-state" id="saveState">本地自动保存</div>
+    <button class="btn sm" data-action="backup" title="导出全部数据为 JSON 备份">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+      备份
+    </button>
+    <button class="btn sm" data-action="import" title="从 JSON 备份恢复">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9m0 0 4 4m-4-4-4 4M5 4h14"/></svg>
+      恢复
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <nav class="nav" id="nav"></nav>
+    <div class="side-sec">
+      <div class="side-head">
+        <span>文献库</span>
+        <button data-action="new-paper" title="新建文献">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16.2 16.2 4 4"/></svg>
+        <input id="search" type="text" placeholder="搜索标题、作者、标签" autocomplete="off">
+      </div>
+      <div class="paper-list" id="paperList"></div>
+    </div>
+    <div class="side-foot">
+      数据保存在当前浏览器本地。<br>换电脑或清理缓存前，请先「备份」。
+    </div>
+  </aside>
+
+  <main id="main"></main>
+</div>
+
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   Breathable Systems · 文献精读工作台
+   单文件离线应用：localStorage 持久化 + JSON 备份 / Markdown 导出
+   ============================================================ */
+
+const KEY = 'bw-workbench-v1';
+const APP_VERSION = '1.0';
+
+const VERDICTS = ['直接支持', '部分支持', '间接相关', '不能支持', '相矛盾'];
+const VERDICT_CLASS = {
+  '直接支持': 'ok', '部分支持': 'mid', '间接相关': 'neutral', '不能支持': 'no', '相矛盾': 'bad'
+};
+const DEPTHS = ['非常值得', '值得了解', '暂时不必深入'];
+const STATUSES = ['在读', '已精读', '已定稿', '搁置'];
+const STATUS_CLASS = { '在读': 'st-reading', '已精读': 'st-read', '已定稿': 'st-final', '搁置': 'st-pause' };
+
+const ICONS = {
+  library: '<rect x="4" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="7" height="16" rx="1.5"/>',
+  guide: '<circle cx="12" cy="12" r="8.5"/><path d="m15.2 8.8-1.9 4.5-4.5 1.9 1.9-4.5z"/>',
+  outline: '<path d="M5 6h14M5 12h9M5 18h11"/>',
+  evidence: '<path d="M7 7h10M7 12h10M7 17h6"/><circle cx="4" cy="7" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="17" r=".8"/>',
+  archive: '<path d="M4 8h16v12H4zM3 4h18v4H3zM9 12h6"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="m16.2 16.2 4 4"/>',
+  download: '<path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/>',
+  upload: '<path d="M12 20V9m0 0 4 4m-4-4-4 4M5 4h14"/>',
+  print: '<path d="M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  left: '<path d="m15 6-6 6 6 6"/>',
+  right: '<path d="m9 6 6 6-6 6"/>',
+  up: '<path d="m6 15 6-6 6 6"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
+  check: '<path d="m5 12 4.5 4.5L19 7"/>',
+  book: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10v16H5.5A1.5 1.5 0 0 1 4 18.5zM10 4h4.5A1.5 1.5 0 0 1 16 5.5v13a1.5 1.5 0 0 1-1.5 1.5H10z"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'
+};
+function icon(name, size = 15) {
+  const p = ICONS[name] || '';
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+}
+
+/* ---------- 固定问题模板（来自综述阅读计划，可在设置里改） ---------- */
+const DEFAULT_QUESTIONS = {
+  step1: [
+    { id: 'q1', label: '作者研究什么？', hint: '一句话写清：材料体系 + 结构策略 + 器件/系统类型 + 面向的应用场景。', placeholder: '例：一种用于 8 天连续皮肤监测的超薄水凝胶传感器……' },
+    { id: 'q2', label: '现有研究有什么问题？', hint: '作者在 Introduction 中指出的具体矛盾或缺口，最好写成“A、B、C 难以兼顾”。', placeholder: '例：超薄、机械强度、透气性、黏附与抗失水难以同时满足……' },
+    { id: 'q3', label: '作者提出什么策略？', hint: '核心设计 + 关键手段（材料 / 结构 / 工艺），不要写成实验步骤。', placeholder: '例：PU 纳米网格骨架 + 温度响应水凝胶复合……' },
+    { id: 'q4', label: '作者声称实现了什么？', hint: '只写 Abstract / Conclusion 中明确声称的结果，带上关键数字。', placeholder: '例：10 μm 厚、WVTR 1669 g·m⁻²·day⁻¹、2.5 MPa、8 天连续监测……' }
+  ],
+  step2: [
+    { id: 'change', label: '作者改变了什么？', hint: '变量：材料配比、结构尺寸、工艺参数、集成方式……' },
+    { id: 'measure', label: '测量了什么？', hint: '指标 + 方法：WVTR、拉伸强度、循环次数、阻抗、温漂……' },
+    { id: 'result', label: '结果说明什么？', hint: '把数字翻译成一句物理 / 工程结论。' },
+    { id: 'claim', label: '这个结果能证明我的哪个观点？', hint: '写成一句可以放进综述的 Claim；暂时没有就写“暂不支撑”。' }
+  ]
+};
+
+/* ---------- 综述大纲（来自《综述初步想法》） ---------- */
+const DEFAULT_OUTLINE = [
+  {
+    id: 's1', no: '1', title: 'Introduction', subs: [
+      { id: '1.1', no: '1.1', title: 'P1 · 可呼吸性是长期可穿戴电子的核心要求' },
+      { id: '1.2', no: '1.2', title: 'P2 · 为什么材料级可渗透并不足够' },
+      { id: '1.3', no: '1.3', title: 'P3 · 从可呼吸元件到系统级可呼吸电子' }
+    ]
+  },
+  {
+    id: 's2', no: '2', title: 'Fundamentals and Design Principles of Breathable Electronics', subs: [
+      { id: '2.1', no: '2.1', title: 'Mass and Moisture Transport in Flexible Electronics' },
+      { id: '2.2', no: '2.2', title: 'Skin–Device Interfacial Microenvironment' },
+      { id: '2.3', no: '2.3', title: 'Breathability–Mechanics–Electronics Coupling' },
+      { id: '2.4', no: '2.4', title: 'Structural Strategies for Permeable Electronic Platforms' }
+    ]
+  },
+  {
+    id: 's3', no: '3', title: 'Functional Components for Breathable Flexible Electronics', subs: [
+      { id: '3.1', no: '3.1', title: 'Breathable Sensors' },
+      { id: '3.2', no: '3.2', title: 'Breathable Conductive Interconnects' },
+      { id: '3.3', no: '3.3', title: 'Breathable Energy Harvesting and Storage' },
+      { id: '3.4', no: '3.4', title: 'Breathable Displays, Heaters, and Actuators' }
+    ]
+  },
+  {
+    id: 's4', no: '4', title: 'From Breathable Components to Integrated Electronic Systems', subs: [
+      { id: '4.1', no: '4.1', title: 'System-Level Breathability and the Weakest-Link Problem' },
+      { id: '4.2', no: '4.2', title: 'Spatially Selective and Mechanics-Guided Integration' },
+      { id: '4.3', no: '4.3', title: 'Breathable Encapsulation and Packaging' },
+      { id: '4.4', no: '4.4', title: 'Power, Communication, and Data Integration' },
+      { id: '4.5', no: '4.5', title: 'Fully Integrated Breathable Electronic Architectures' }
+    ]
+  },
+  {
+    id: 's5', no: '5', title: 'Application-Driven Design of Breathable Electronic Systems', subs: [
+      { id: '5.1', no: '5.1', title: 'Long-Term Epidermal Electronics' },
+      { id: '5.2', no: '5.2', title: 'High-Deformation Wearable Electronics' },
+      { id: '5.3', no: '5.3', title: 'Electronic Textiles and Smart Garments' },
+      { id: '5.4', no: '5.4', title: 'Human–Machine Interfaces and Soft Robotics' },
+      { id: '5.5', no: '5.5', title: 'Autonomous and Closed-Loop Wearable Systems' }
+    ]
+  },
+  {
+    id: 's6', no: '6', title: 'Conclusions and Outlook', subs: [
+      { id: '6.1', no: '6.1', title: 'P1 · 从静态渗透率到动态可呼吸性' },
+      { id: '6.2', no: '6.2', title: 'P2 · 从材料级渗透到系统级评价' },
+      { id: '6.3', no: '6.3', title: 'P3 · 从可呼吸基底到可呼吸功能集成' },
+      { id: '6.4', no: '6.4', title: 'P4 · 从孤立器件到可扩展多功能系统' },
+      { id: '6.5', no: '6.5', title: 'P5 · 走向全可呼吸、自主化的电子系统' }
+    ]
+  }
+];
+
+/* ---------- 工具函数 ---------- */
+function uid(prefix) {
+  return (prefix || 'id') + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+}
+function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function fmtDateTime(ts) {
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function relTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  if (diff < 60e3) return '刚刚';
+  if (diff < 3600e3) return Math.floor(diff / 60e3) + ' 分钟前';
+  if (diff < 86400e3) return Math.floor(diff / 3600e3) + ' 小时前';
+  if (diff < 7 * 86400e3) return Math.floor(diff / 86400e3) + ' 天前';
+  return fmtDateTime(ts).slice(0, 10);
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2400);
+}
+function download(filename, text, mime) {
+  const blob = new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 400);
+}
+function setPath(obj, path, value) {
+  const parts = path.split('.');
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (o[parts[i]] == null || typeof o[parts[i]] !== 'object') o[parts[i]] = {};
+    o = o[parts[i]];
+  }
+  o[parts[parts.length - 1]] = value;
+}
+function countFilled(obj, keys) {
+  let n = 0;
+  keys.forEach(k => { if (String((obj && obj[k]) || '').trim()) n++; });
+  return n;
+}
+function safeName(s) {
+  return String(s || '未命名文献').replace(/[\\/:*?"<>|\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 70);
+}
+
+/* ---------- 大纲辅助 ---------- */
+function allSections() {
+  const out = [];
+  (state.outline || []).forEach(sec => {
+    (sec.subs || []).forEach(sub => out.push({ id: sub.id, no: sub.no, title: sub.title, parent: sec }));
+  });
+  return out;
+}
+function secLabel(id) {
+  if (!id) return '';
+  const s = allSections().find(x => x.id === id);
+  return s ? s.no + ' ' + s.title : id;
+}
+function sectionOptions(selected) {
+  return allSections().map(s =>
+    '<option value="' + esc(s.id) + '"' + (s.id === selected ? ' selected' : '') + '>' + esc(s.no + ' ' + s.title) + '</option>'
+  ).join('');
+}
+
+/* ---------- 示例文献 ---------- */
+function demoPaper() {
+  const t = Date.now();
+  return {
+    id: 'demo_hydrogel',
+    createdAt: t - 2 * 86400e3,
+    updatedAt: t - 1 * 86400e3,
+    status: '已精读',
+    meta: {
+      title: 'Ultrathin breathable hydrogel skin sensor reinforced by a polyurethane nanomesh（示例条目）',
+      authors: '示例 · 请替换为真实作者',
+      journal: '示例期刊',
+      year: '2024',
+      doi: '',
+      link: '',
+      tags: ['水凝胶', '透气', '皮肤传感', 'PU 纳米网格'],
+      section: '2.4'
+    },
+    step1: {
+      q1: '面向长期皮肤监测的超薄水凝胶传感器：温度响应水凝胶提供贴合与离子导电，PU 纳米网格提供力学增强。',
+      q2: '超薄性、机械强度、透气性、黏附性与抗失水能力难以同时兼顾：越薄越透气，但越容易破损、失水、失去黏附。',
+      q3: '用静电纺丝制备 PU 纳米网格作为力学骨架，再以浸涂方式与甘油 / 硼砂 / 硫酸钠体系的水凝胶复合，得到约 10 μm 的超薄透气传感层。',
+      q4: '约 10 μm 厚度；WVTR 1669.3 ± 23.5 g·m⁻²·day⁻¹；拉伸强度 2.5 MPa；1000 次循环拉伸后仍稳定；实现 8 天连续监测。',
+      summary: '用“纳米网格骨架 + 超薄水凝胶”同时换取透气与力学稳健，是材料—结构协同的典型案例。'
+    },
+    chain: {
+      material: 'PU 纳米网格 + 温度响应水凝胶',
+      problem: '超薄、透气、强韧、黏附、抗失水难以兼得',
+      principle: '纳米网格承担力学载荷；水凝胶提供贴合、离子导电与透湿通道',
+      proof: '厚度、WVTR、拉伸强度、1000 次循环、8 天连续监测',
+      role: '支撑“结构工程可突破材料本征取舍”的论点，可放在 2.4 与 3.1'
+    },
+    figures: [
+      {
+        id: uid('fig'), ref: 'Figure 2G',
+        change: '纳米网格密度与复合膜厚度',
+        measure: 'WVTR、膜厚',
+        result: '厚度约 10 μm、WVTR 1669.3 ± 23.5 g·m⁻²·day⁻¹，明显高于对照样品',
+        claim: '超薄多孔结构可以改善柔性电子设备的可呼吸性',
+        verdict: '直接支持'
+      },
+      {
+        id: uid('fig'), ref: 'Figure 3',
+        change: '有无 PU 纳米网格增强',
+        measure: '拉伸强度；1000 次循环拉伸后的形貌与电学稳定性',
+        result: '拉伸强度 2.5 MPa，循环后性能基本不变',
+        claim: '纳米网格增强可以缓解“超薄—易碎”的矛盾',
+        verdict: '直接支持'
+      },
+      {
+        id: uid('fig'), ref: 'Figure 5',
+        change: '连续佩戴时长（至 8 天）',
+        measure: '连续监测信号与皮肤接触状态',
+        result: '8 天内信号保持稳定，未出现明显脱落',
+        claim: '该器件具备长期（≥8 天）皮肤佩戴能力',
+        verdict: '部分支持'
+      }
+    ],
+    methods: [
+      { id: uid('m'), name: '静电纺丝', depth: '值得了解', role: '纳米网格结构的形成方式，决定纤维直径与孔隙' },
+      { id: uid('m'), name: '纳米网格密度', depth: '非常值得', role: '直接影响厚度、机械性能与透气性' },
+      { id: uid('m'), name: '浸涂（Dip-coating）', depth: '值得了解', role: '纳米网格与水凝胶的复合方式，决定界面结合' },
+      { id: uid('m'), name: '甘油', depth: '值得了解', role: '与抗失水、保湿能力相关' },
+      { id: uid('m'), name: '硼砂', depth: '暂时不必深入', role: '交联作用；化学反应细节可暂缓' },
+      { id: uid('m'), name: 'Na₂SO₄', depth: '暂时不必深入', role: '影响离子导电性与稳定性' }
+    ],
+    claims: [
+      {
+        id: uid('c'),
+        claim: '超薄多孔结构可以改善柔性电子设备的可呼吸性',
+        evidence: '厚度约 10 μm；WVTR 1669.3 ± 23.5 g·m⁻²·day⁻¹；作者将高透气性归因于超薄厚度与多孔结构。',
+        source: 'Figure 2G；Results',
+        verdict: '直接支持',
+        section: '2.4'
+      },
+      {
+        id: uid('c'),
+        claim: '纳米网格增强可以缓解超薄结构与机械稳健性之间的矛盾',
+        evidence: 'PU 纳米网格增强；拉伸强度 2.5 MPa；1000 次循环拉伸。',
+        source: 'Figure 3；Results',
+        verdict: '直接支持',
+        section: '2.4'
+      },
+      {
+        id: uid('c'),
+        claim: '该器件具备长期（≥8 天）皮肤佩戴能力',
+        evidence: '连续 8 天监测信号稳定；但未报告皮肤炎症 / 过敏的定量评估。',
+        source: 'Figure 5；Discussion',
+        verdict: '部分支持',
+        section: '5.1'
+      }
+    ],
+    limits: {
+      cannot: 'WVTR 只说明水蒸气能穿过，不能证明：防风 / 防水、汗液长期浸泡下的稳定性、皮肤炎症与过敏、反复粘贴后的黏附衰减、系统级（电源 / 通信）的可呼吸性。',
+      gap: '“透气”被简化为单一 WVTR 指标；实验未在真实出汗、运动、温湿循环条件下测试；8 天监测未给出皮肤生理指标。',
+      judgment: '可作为“材料—结构协同提升透气与力学”的直接证据；但不能作为“系统级长期可穿戴已解决”的证据。引用时应把结论限定在材料 / 器件层。',
+      todo: '查证：是否有皮肤刺激性测试（如 ISO 10993）；WVTR 测试标准（ASTM E96 / JIS L1099）；同类纳米网格水凝胶的对照数据。'
+    },
+    final: {
+      summary: '这篇论文说明：把“透气”与“强韧”从材料本征属性的取舍，转化为结构设计问题，是一条可行路径。它给我的综述提供的是“结构策略层”的证据，而不是“系统集成层”的证据。',
+      takeaway: '结构工程可以把材料矛盾转化为可调的设计参数。'
+    },
+    versions: []
+  };
+}
+
+function defaultState() {
+  const t = Date.now();
+  return {
+    version: 1,
+    createdAt: t,
+    updatedAt: t,
+    settings: { lastBackup: null },
+    questions: clone(DEFAULT_QUESTIONS),
+    outline: clone(DEFAULT_OUTLINE),
+    papers: []
+  };
+}
+
+function buildDemoPaper() {
+  const p = demoPaper();
+  const snap = clone(p);
+  snap.versions = [];
+  p.versions = [{ id: uid('v'), ts: Date.now() - 86400e3, label: 'v1 · 示例定稿', data: snap }];
+  return p;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return defaultState();
+    const s = JSON.parse(raw);
+    if (!s || !Array.isArray(s.papers)) return defaultState();
+    return migrate(s);
+  } catch (e) {
+    console.warn('读取本地数据失败', e);
+    return defaultState();
+  }
+}
+function migrate(s) {
+  if (!s.questions) s.questions = clone(DEFAULT_QUESTIONS);
+  if (!s.questions.step1) s.questions.step1 = clone(DEFAULT_QUESTIONS.step1);
+  if (!s.questions.step2) s.questions.step2 = clone(DEFAULT_QUESTIONS.step2);
+  if (!s.outline || !s.outline.length) s.outline = clone(DEFAULT_OUTLINE);
+  if (!s.settings) s.settings = { lastBackup: null };
+  s.papers.forEach(p => {
+    p.meta = p.meta || {};
+    p.meta.tags = p.meta.tags || [];
+    p.step1 = p.step1 || {};
+    p.step2 = p.step2 || {};
+    p.chain = p.chain || {};
+    p.limits = p.limits || {};
+    p.final = p.final || {};
+    p.figures = p.figures || [];
+    p.methods = p.methods || [];
+    p.claims = p.claims || [];
+    p.versions = p.versions || [];
+    p.status = p.status || '在读';
+  });
+  return s;
+}
+
+/* ---------- 全局状态 ---------- */
+let state = null;
+let saveTimer = null;
+const ui = {
+  view: 'library', paperId: null, tab: 'overview',
+  search: '', sidebarOpen: false,
+  evSection: 'all', evVerdict: 'all', evQuery: '',
+  versionView: null
+};
+
+function currentPaper() {
+  if (!state || !ui.paperId) return null;
+  return state.papers.find(p => p.id === ui.paperId) || null;
+}
+function saveNow() {
+  if (!state) return;
+  state.updatedAt = Date.now();
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    updateSaveLabel('已保存 ' + fmtDateTime(Date.now()).slice(11));
+  } catch (e) {
+    updateSaveLabel('保存失败');
+    toast('本地存储写入失败，请先备份数据');
+  }
+}
+function saveSoon() {
+  updateSaveLabel('保存中…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 450);
+}
+function updateSaveLabel(txt) {
+  const el = document.getElementById('saveState');
+  if (el) el.textContent = txt || '本地自动保存';
+}
+
+/* ---------- 进度 ---------- */
+function paperProgress(p) {
+  const ids1 = (state.questions.step1 || []).map(q => q.id);
+  const f1 = countFilled(p.step1, ids1);
+  const figDone = p.figures.filter(f => f.change && f.measure && f.result).length;
+  const methodDone = p.methods.filter(m => m.name && m.name.trim()).length;
+  const claimDone = p.claims.filter(c => c.claim && c.evidence).length;
+  const s5 = (p.limits.cannot && p.limits.judgment) ? 1 : 0;
+  const s6 = (p.final.summary || p.final.takeaway) ? 1 : 0;
+  const steps = [
+    { key: 'step1', label: '初读', done: f1 >= 4, detail: f1 + '/4 问' },
+    { key: 'step2', label: '读图', done: figDone >= 1, detail: figDone + ' 图' },
+    { key: 'step3', label: '方法', done: methodDone >= 1, detail: methodDone + ' 项' },
+    { key: 'step4', label: '论据', done: claimDone >= 1, detail: claimDone + ' 条' },
+    { key: 'step5', label: '边界', done: !!s5, detail: s5 ? '已写' : '待写' },
+    { key: 'final', label: '定稿', done: !!s6, detail: s6 ? '已写' : '待写' }
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+  return { steps: steps, pct: Math.round(doneCount / steps.length * 100), doneCount: doneCount };
+}
+
+/* ---------- Markdown 导出 ---------- */
+function paperMarkdown(p) {
+  const m = p.meta || {};
+  const L = [];
+  L.push('# ' + (m.title || '未命名文献'));
+  const meta = [];
+  if (m.authors) meta.push('作者：' + m.authors);
+  if (m.journal) meta.push('期刊：' + m.journal);
+  if (m.year) meta.push('年份：' + m.year);
+  if (m.doi) meta.push('DOI：' + m.doi);
+  if (m.tags && m.tags.length) meta.push('标签：' + m.tags.join('、'));
+  if (m.section) meta.push('对应章节：' + secLabel(m.section));
+  meta.push('状态：' + (p.status || '在读'));
+  L.push(meta.join(' ｜ '));
+  L.push('');
+
+  const q1 = (state.questions.step1 || []);
+  const any1 = q1.some(q => String(p.step1[q.id] || '').trim());
+  if (any1 || p.step1.summary) {
+    L.push('## 一、初读（Abstract + Introduction）');
+    q1.forEach((q, i) => {
+      const v = String(p.step1[q.id] || '').trim();
+      if (!v) return;
+      L.push('**Q' + (i + 1) + ' ' + q.label + '**');
+      L.push(v);
+      L.push('');
+    });
+    if (p.step1.summary) { L.push('**一句话总结**'); L.push(p.step1.summary); L.push(''); }
+  }
+
+  if (p.figures.length) {
+    L.push('## 二、读图');
+    p.figures.forEach((f, i) => {
+      L.push('### 图 ' + (i + 1) + (f.ref ? ' · ' + f.ref : ''));
+      const q2 = state.questions.step2 || [];
+      q2.forEach(q => {
+        const v = String(f[q.id] || '').trim();
+        if (v) L.push('- ' + q.label + ' ' + v);
+      });
+      if (f.verdict) L.push('- 证据判断：' + f.verdict);
+      L.push('');
+    });
+  }
+
+  if (p.methods.length) {
+    L.push('## 三、方法（只记设计策略，不复述制备流程）');
+    L.push('| 方法 / 参数 | 重要度 | 作用与设计策略 |');
+    L.push('| --- | --- | --- |');
+    p.methods.forEach(x => {
+      L.push('| ' + (x.name || '') + ' | ' + (x.depth || '') + ' | ' + String(x.role || '').replace(/\n/g, ' ') + ' |');
+    });
+    L.push('');
+  }
+
+  if (p.claims.length) {
+    L.push('## 四、转化为论据');
+    p.claims.forEach((c, i) => {
+      L.push('### Claim ' + (i + 1));
+      L.push('- Claim：' + (c.claim || ''));
+      L.push('- 证据：' + String(c.evidence || '').replace(/\n/g, ' '));
+      L.push('- 来源：' + (c.source || ''));
+      L.push('- 证据判断：' + (c.verdict || ''));
+      if (c.section) L.push('- 对应章节：' + secLabel(c.section));
+      L.push('');
+    });
+  }
+
+  const lim = p.limits || {};
+  if (lim.cannot || lim.gap || lim.judgment || lim.todo) {
+    L.push('## 五、边界：这篇论文不能证明什么');
+    if (lim.cannot) { L.push('**不能证明**'); L.push(lim.cannot); L.push(''); }
+    if (lim.gap) { L.push('**实验与结论之间的缺口**'); L.push(lim.gap); L.push(''); }
+    if (lim.judgment) { L.push('**我的判断 / 引用方式**'); L.push(lim.judgment); L.push(''); }
+    if (lim.todo) { L.push('**待查证**'); L.push(lim.todo); L.push(''); }
+  }
+
+  const ch = p.chain || {};
+  if (ch.material || ch.problem || ch.principle || ch.proof || ch.role) {
+    L.push('## 逻辑链');
+    if (ch.material) L.push('- 选择什么材料 / 结构：' + ch.material);
+    if (ch.problem) L.push('- 解决什么问题：' + ch.problem);
+    if (ch.principle) L.push('- 设计原理：' + ch.principle);
+    if (ch.proof) L.push('- 实验如何证明：' + ch.proof);
+    if (ch.role) L.push('- 为综述提供什么：' + ch.role);
+    L.push('');
+  }
+
+  if (p.final.summary || p.final.takeaway) {
+    L.push('## 定稿');
+    if (p.final.takeaway) { L.push('**一句话带走**'); L.push(p.final.takeaway); L.push(''); }
+    if (p.final.summary) { L.push('**综合评述**'); L.push(p.final.summary); L.push(''); }
+  }
+  return L.join('\n');
+}
+
+function allMarkdown() {
+  const head = '# 文献精读总表\n\n'
+    + '> 综述题目：From Permeable Materials to Breathable Systems: Engineering Flexible Electronics for Long-Term Wearability\n\n'
+    + '导出时间：' + fmtDateTime(Date.now()) + ' ｜ 共 ' + state.papers.length + ' 篇\n\n---\n\n';
+  return head + state.papers.map(paperMarkdown).join('\n\n---\n\n');
+}
+
+function evidenceMarkdown() {
+  const rows = collectClaims(ui.evSection, ui.evVerdict, ui.evQuery);
+  const bySec = {};
+  rows.forEach(r => {
+    const k = r.claim.section || 'unassigned';
+    (bySec[k] = bySec[k] || []).push(r);
+  });
+  const L = ['# 证据总表', '', '导出时间：' + fmtDateTime(Date.now()), ''];
+  Object.keys(bySec).forEach(k => {
+    L.push('## ' + (k === 'unassigned' ? '未归类' : secLabel(k)));
+    bySec[k].forEach(r => {
+      L.push('- **Claim**：' + r.claim.claim);
+      L.push('  - 证据：' + String(r.claim.evidence || '').replace(/\n/g, ' '));
+      L.push('  - 来源：' + (r.claim.source || '') + '（' + r.paperTitle + '）');
+      L.push('  - 判断：' + (r.claim.verdict || ''));
+    });
+    L.push('');
+  });
+  return L.join('\n');
+}
+
+function collectClaims(section, verdict, query) {
+  const q = String(query || '').toLowerCase();
+  const out = [];
+  state.papers.forEach(p => {
+    p.claims.forEach(c => {
+      if (section !== 'all' && c.section !== section) return;
+      if (verdict !== 'all' && c.verdict !== verdict) return;
+      if (q) {
+        const hay = (c.claim + ' ' + c.evidence + ' ' + (c.source || '') + ' ' + (p.meta.title || '')).toLowerCase();
+        if (!hay.includes(q)) return;
+      }
+      out.push({ claim: c, paper: p, paperTitle: p.meta.title || '未命名文献' });
+    });
+  });
+  return out;
+}
+
+/* ---------- 打印用完整卡片 ---------- */
+function compiledHTML(p) {
+  const m = p.meta || {};
+  const h = [];
+  h.push('<h1>' + esc(m.title || '未命名文献') + '</h1>');
+  const meta = [];
+  if (m.authors) meta.push(m.authors);
+  if (m.journal) meta.push(m.journal);
+  if (m.year) meta.push(m.year);
+  if (m.doi) meta.push('DOI ' + m.doi);
+  h.push('<p class="muted small">' + esc(meta.join(' · ')) + '</p>');
+  if (m.section) h.push('<p class="small">对应章节：' + esc(secLabel(m.section)) + '</p>');
+
+  const q1 = state.questions.step1 || [];
+  const any1 = q1.some(q => String(p.step1[q.id] || '').trim());
+  if (any1) {
+    h.push('<h2>一、初读</h2>');
+    q1.forEach((q, i) => {
+      const v = String(p.step1[q.id] || '').trim();
+      if (!v) return;
+      h.push('<h3>Q' + (i + 1) + ' ' + esc(q.label) + '</h3><p>' + esc(v).replace(/\n/g, '<br>') + '</p>');
+    });
+  }
+  if (p.figures.length) {
+    h.push('<h2>二、读图</h2>');
+    p.figures.forEach((f, i) => {
+      h.push('<h3>图 ' + (i + 1) + (f.ref ? ' · ' + esc(f.ref) : '') + '</h3>');
+      (state.questions.step2 || []).forEach(q => {
+        const v = String(f[q.id] || '').trim();
+        if (v) h.push('<p><b>' + esc(q.label) + '</b> ' + esc(v).replace(/\n/g, '<br>') + '</p>');
+      });
+      if (f.verdict) h.push('<p><b>证据判断</b> ' + esc(f.verdict) + '</p>');
+    });
+  }
+  if (p.methods.length) {
+    h.push('<h2>三、方法</h2>');
+    p.methods.forEach(x => h.push('<p><b>' + esc(x.name) + '</b>（' + esc(x.depth) + '）：' + esc(x.role) + '</p>'));
+  }
+  if (p.claims.length) {
+    h.push('<h2>四、论据</h2>');
+    p.claims.forEach((c, i) => {
+      h.push('<h3>Claim ' + (i + 1) + '</h3>');
+      h.push('<p>' + esc(c.claim) + '</p>');
+      h.push('<p><b>证据</b> ' + esc(c.evidence).replace(/\n/g, '<br>') + '</p>');
+      h.push('<p><b>来源</b> ' + esc(c.source) + ' ｜ <b>判断</b> ' + esc(c.verdict) + '</p>');
+    });
+  }
+  const lim = p.limits || {};
+  if (lim.cannot || lim.gap || lim.judgment) {
+    h.push('<h2>五、边界</h2>');
+    if (lim.cannot) h.push('<p><b>不能证明</b> ' + esc(lim.cannot).replace(/\n/g, '<br>') + '</p>');
+    if (lim.gap) h.push('<p><b>缺口</b> ' + esc(lim.gap).replace(/\n/g, '<br>') + '</p>');
+    if (lim.judgment) h.push('<p><b>判断</b> ' + esc(lim.judgment).replace(/\n/g, '<br>') + '</p>');
+  }
+  if (p.final.summary) {
+    h.push('<h2>定稿</h2><p>' + esc(p.final.summary).replace(/\n/g, '<br>') + '</p>');
+  }
+  return h.join('\n');
+}
+
+/* ---------- 版本 ---------- */
+function makeSnapshot(p, label) {
+  const data = clone(p);
+  data.versions = [];
+  return { id: uid('v'), ts: Date.now(), label: label, data: data };
+}
+function saveVersion(p) {
+  const label = 'v' + (p.versions.length + 1) + ' · 定稿';
+  p.versions.unshift(makeSnapshot(p, label));
+  p.status = '已定稿';
+  p.updatedAt = Date.now();
+  saveNow();
+  toast('已保存 ' + label + '，历史版本已留档');
+}
+
+
+/* ============ 视图：导航 / 文献库 / 文献详情 ============ */
+
+function renderNav() {
+  const claimCount = state.papers.reduce((n, p) => n + p.claims.length, 0);
+  const finalCount = state.papers.filter(p => p.status === '已定稿' || p.versions.length).length;
+  const items = [
+    { view: 'library', label: '文献库', ic: 'library', count: state.papers.length },
+    { view: 'guide', label: '阅读方法', ic: 'guide', count: '' },
+    { view: 'outline', label: '大纲地图', ic: 'outline', count: '' },
+    { view: 'evidence', label: '证据总表', ic: 'evidence', count: claimCount || '' },
+    { view: 'archive', label: '定稿库', ic: 'archive', count: finalCount || '' },
+    { view: 'settings', label: '设置', ic: 'settings', count: '' }
+  ];
+  const activeView = ui.view === 'paper' ? 'library' : ui.view;
+  document.getElementById('nav').innerHTML = items.map(it => {
+    const active = activeView === it.view ? ' active' : '';
+    return '<div class="nav-item' + active + '" data-action="nav" data-view="' + it.view + '">'
+      + icon(it.ic, 15) + '<span>' + it.label + '</span>'
+      + (it.count !== '' ? '<span class="count">' + it.count + '</span>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function renderPaperList() {
+  const q = ui.search.trim().toLowerCase();
+  const list = state.papers
+    .filter(p => {
+      if (!q) return true;
+      const hay = [(p.meta.title || ''), p.meta.authors || '', (p.meta.tags || []).join(' '), p.meta.journal || ''].join(' ').toLowerCase();
+      return hay.includes(q);
+    })
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+
+  const el = document.getElementById('paperList');
+  if (!list.length) {
+    el.innerHTML = '<div class="small muted" style="padding:8px 10px;line-height:1.7">'
+      + (q ? '没有匹配的文献。' : '还没有文献，点右上角 ＋ 新建。') + '</div>';
+    return;
+  }
+  el.innerHTML = list.map(p => {
+    const active = (ui.view === 'paper' && ui.paperId === p.id) ? ' active' : '';
+    return '<div class="paper-item' + active + '" data-action="open-paper" data-id="' + p.id + '" title="' + esc(p.meta.title) + '">'
+      + '<div class="t">' + esc(p.meta.title || '未命名文献') + '</div>'
+      + '<div class="m"><span class="dot ' + (STATUS_CLASS[p.status] || '') + '"></span>'
+      + '<span class="st">' + esc(p.status || '在读') + '</span>'
+      + '<span class="sec">' + esc(p.meta.section ? secLabel(p.meta.section) : '未归类') + '</span>'
+      + '<span class="time">' + esc(relTime(p.updatedAt)) + '</span></div>'
+      + '</div>';
+  }).join('');
+}
+
+function emptyBlock(title, desc, actionHtml) {
+  return '<div class="empty"><h3>' + esc(title) + '</h3><p>' + esc(desc) + '</p>' + (actionHtml || '') + '</div>';
+}
+
+/* ---------------- 视图切换 ---------------- */
+function renderMain() {
+  const main = document.getElementById('main');
+  let html = '';
+  if (ui.view === 'paper') {
+    if (!currentPaper()) { ui.view = 'library'; }
+  }
+  switch (ui.view) {
+    case 'library': html = viewLibrary(); break;
+    case 'paper': html = viewPaper(); break;
+    case 'guide': html = viewGuide(); break;
+    case 'outline': html = viewOutline(); break;
+    case 'evidence': html = viewEvidence(); break;
+    case 'archive': html = viewArchive(); break;
+    case 'settings': html = viewSettings(); break;
+    default: html = viewLibrary();
+  }
+  main.innerHTML = html;
+  document.querySelectorAll('#main textarea').forEach(autoGrow);
+}
+
+function renderAll(opts) {
+  renderNav();
+  renderPaperList();
+  const y = window.scrollY;
+  renderMain();
+  if (opts && opts.keepScroll) window.scrollTo(0, y);
+}
+
+function autoGrow(el) {
+  if (!el || el.tagName !== 'TEXTAREA') return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(Math.max(el.scrollHeight + 2, 70), 560) + 'px';
+}
+
+/* ---------------- 文献库 ---------------- */
+function viewLibrary() {
+  const papers = state.papers.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+  const finals = state.papers.filter(p => p.versions.length).length;
+  const claims = state.papers.reduce((n, p) => n + p.claims.length, 0);
+  const versions = state.papers.reduce((n, p) => n + p.versions.length, 0);
+
+  let backupTip = '';
+  if (state.papers.length && (!state.settings.lastBackup || Date.now() - state.settings.lastBackup > 7 * 86400e3)) {
+    backupTip = '<div class="tip-line no-print"><span>数据只存在这台电脑的浏览器里，建议现在做一次备份。</span>'
+      + '<button class="btn sm" data-action="backup">立即备份</button></div>';
+  }
+
+  const hero = '<section class="hero">'
+    + '<div class="eyebrow">Review Project · 综述工程</div>'
+    + '<h2>From Permeable Materials to Breathable Systems</h2>'
+    + '<p>把“读论文”拆成固定的五步动作：初读四问、读图四问、方法分级、论据化、以及这篇论文不能证明什么。每篇文献都留下可追溯的定稿版本，最后直接汇总成综述证据表。</p>'
+    + '<div class="meta-row">'
+    + '<span class="badge">6 章 · 26 小节</span>'
+    + '<span class="badge">固定问题 · 不必每次重新想</span>'
+    + '<span class="badge">本地保存 · 可导出 Markdown</span>'
+    + '</div>'
+    + '</section>';
+
+  const stats = '<div class="stat-grid">'
+    + '<div class="stat"><b>' + state.papers.length + '</b><span>文献总数</span></div>'
+    + '<div class="stat"><b>' + finals + '</b><span>已留档</span></div>'
+    + '<div class="stat accent"><b>' + claims + '</b><span>可用论据</span></div>'
+    + '<div class="stat"><b>' + versions + '</b><span>历史定稿版本</span></div>'
+    + '</div>';
+
+  const listHtml = papers.length
+    ? '<div class="paper-grid">' + papers.map(p => {
+      const pr = paperProgress(p);
+      return '<article class="card paper-card" data-action="open-paper" data-id="' + p.id + '">'
+        + '<div class="pcard-head"><span class="badge ' + (p.status === '已定稿' ? 'ok' : 'plain') + '">' + esc(p.status || '在读') + '</span>'
+        + '<span class="small muted">' + esc(relTime(p.updatedAt)) + '</span></div>'
+        + '<h3 class="pcard-title">' + esc(p.meta.title || '未命名文献') + '</h3>'
+        + '<div class="pcard-meta">' + esc([p.meta.authors, p.meta.journal, p.meta.year].filter(Boolean).join(' · ') || '尚未填写文献信息') + '</div>'
+        + '<div class="pcard-sec">' + esc(p.meta.section ? secLabel(p.meta.section) : '未归类到章节') + '</div>'
+        + '<div class="pcard-foot"><div class="prog"><i style="width:' + pr.pct + '%"></i></div><span class="small muted">' + pr.pct + '%</span></div>'
+        + '</article>';
+    }).join('') + '</div>'
+    : emptyBlock('文献库还是空的', '新建第一条文献开始；也可以先载入示例，照着填一遍找手感。',
+      '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+      + '<button class="btn primary" data-action="new-paper">' + icon('plus', 14) + ' 新建文献</button>'
+      + '<button class="btn" data-action="load-demo">载入示例</button></div>');
+
+  const flow = '<section class="card flow-card">'
+    + '<div class="block-head"><div><h3>一篇论文的固定流程</h3><div class="sub">点任意一步直接进入对应页面</div></div>'
+    + '<button class="btn ghost sm" data-action="nav" data-view="guide">完整方法 ' + icon('right', 13) + '</button></div>'
+    + '<div class="flow">'
+    + flowStep('01', '初读', 'Abstract + Introduction，回答四问')
+    + flowStep('02', '读图', '变什么 / 测什么 / 说明什么 / 支撑谁')
+    + flowStep('03', '方法', '只记设计策略，按三档取舍')
+    + flowStep('04', '论据', 'Claim + 证据 + 来源 + 判断')
+    + flowStep('05', '边界', '这篇论文不能证明什么')
+    + '</div></section>';
+
+  return '<div class="page-head"><div><div class="eyebrow">Literature Library</div>'
+    + '<h2 class="page-title">文献库</h2>'
+    + '<p class="page-sub">共 ' + state.papers.length + ' 篇 · 已留档 ' + finals + ' 篇 · 论据 ' + claims + ' 条</p></div>'
+    + '<div class="page-actions"><button class="btn" data-action="export-all">' + icon('download', 14) + ' 导出全书</button>'
+    + '<button class="btn primary" data-action="new-paper">' + icon('plus', 14) + ' 新建文献</button></div></div>'
+    + backupTip + hero + stats + flow
+    + '<div class="section-title"><h3>最近文献</h3><span class="small muted">按最近修改排序</span></div>'
+    + listHtml;
+}
+
+function flowStep(no, title, desc) {
+  return '<div class="flow-item"><span class="flow-no">' + no + '</span><div><b>' + title + '</b><span>' + desc + '</span></div></div>';
+}
+
+/* ---------------- 文献详情 ---------------- */
+function viewPaper() {
+  const p = currentPaper();
+  const pr = paperProgress(p);
+  const tabs = [
+    ['overview', '概览'], ['step1', '① 初读'], ['step2', '② 读图'], ['step3', '③ 方法'],
+    ['step4', '④ 论据'], ['step5', '⑤ 边界'], ['final', '定稿']
+  ];
+  const tabBar = '<div class="tabs no-print">' + tabs.map(t =>
+    '<button class="tab' + (ui.tab === t[0] ? ' active' : '') + '" data-action="tab" data-tab="' + t[0] + '">'
+    + '<span class="idx">' + (t[0] === 'overview' ? '·' : '') + '</span>' + t[1] + '</button>'
+  ).join('') + '</div>';
+
+  const metaLine = [p.meta.authors, p.meta.journal, p.meta.year].filter(Boolean).join(' · ');
+  const head = '<div class="paper-top no-print"><div style="min-width:0">'
+    + '<div class="eyebrow">' + esc(p.meta.section ? secLabel(p.meta.section) : '未归类章节') + '</div>'
+    + '<h2 class="paper-title">' + esc(p.meta.title || '未命名文献') + '</h2>'
+    + '<div class="paper-meta">'
+    + (metaLine ? '<span>' + esc(metaLine) + '</span>' : '')
+    + (p.meta.doi ? '<span>DOI ' + esc(p.meta.doi) + '</span>' : '')
+    + '<span>' + esc(p.status || '在读') + '</span>'
+    + '<span>更新于 ' + esc(relTime(p.updatedAt)) + '</span>'
+    + '</div></div>'
+    + '<div class="page-actions">'
+    + '<button class="btn" data-action="export-paper">' + icon('download', 14) + ' 导出</button>'
+    + '<button class="btn" data-action="copy-md">' + icon('copy', 14) + ' 复制</button>'
+    + '<button class="btn primary" data-action="save-version">' + icon('check', 14) + ' 保存定稿</button>'
+    + '<button class="icon-btn danger" data-action="delete-paper" title="删除这篇文献">' + icon('trash', 15) + '</button>'
+    + '</div></div>'
+    + '<div class="prog-card no-print"><div class="prog-row"><div class="prog"><i data-prog-bar style="width:' + pr.pct + '%"></i></div>'
+    + '<b data-prog-text>' + pr.pct + '%</b></div>'
+    + '<div class="step-pills">' + pr.steps.map(s =>
+      '<span class="step-pill' + (s.done ? ' done' : '') + '" data-step-pill="' + s.key + '" data-action="tab" data-tab="' + s.key + '">'
+      + s.label + ' · ' + s.detail + '</span>').join('') + '</div></div>';
+
+  let body = '';
+  switch (ui.tab) {
+    case 'step1': body = paperStep1(p); break;
+    case 'step2': body = paperStep2(p); break;
+    case 'step3': body = paperStep3(p); break;
+    case 'step4': body = paperStep4(p); break;
+    case 'step5': body = paperStep5(p); break;
+    case 'final': body = paperFinal(p); break;
+    default: body = paperOverview(p, pr);
+  }
+
+  return '<div class="no-print">' + head + tabBar + body + '</div>'
+    + '<div class="print-only">' + compiledHTML(p) + '</div>';
+}
+
+function paperOverview(p, pr) {
+  const meta = '<section class="card">'
+    + '<div class="block-head"><div><h3>文献信息</h3><div class="sub">标题、出处与归类，会出现在导出与证据表里</div></div></div>'
+    + '<div class="field"><label>标题</label><input type="text" data-f="meta.title" value="' + esc(p.meta.title) + '" placeholder="论文标题"></div>'
+    + '<div class="grid-2">'
+    + '<div class="field"><label>作者</label><input type="text" data-f="meta.authors" value="' + esc(p.meta.authors) + '" placeholder="第一作者 et al."></div>'
+    + '<div class="field"><label>期刊 / 会议</label><input type="text" data-f="meta.journal" value="' + esc(p.meta.journal) + '" placeholder="Nature Electronics…"></div>'
+    + '</div>'
+    + '<div class="grid-3">'
+    + '<div class="field"><label>年份</label><input type="text" data-f="meta.year" value="' + esc(p.meta.year) + '" placeholder="2024"></div>'
+    + '<div class="field"><label>DOI</label><input type="text" data-f="meta.doi" value="' + esc(p.meta.doi) + '" placeholder="10.xxxx/…"></div>'
+    + '<div class="field"><label>状态</label><select data-f="status">' + STATUSES.map(s => '<option' + (p.status === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></div>'
+    + '</div>'
+    + '<div class="grid-2">'
+    + '<div class="field"><label>标签 <em>用逗号分隔</em></label><input type="text" data-f="meta.tags" value="' + esc((p.meta.tags || []).join(', ')) + '" placeholder="水凝胶, 透气, 皮肤传感"></div>'
+    + '<div class="field"><label>对应综述章节</label><select data-f="meta.section"><option value="">未归类</option>' + sectionOptions(p.meta.section) + '</select></div>'
+    + '</div>'
+    + '<div class="field"><label>链接 / 本地文件路径 <em>可选</em></label><input type="text" data-f="meta.link" value="' + esc(p.meta.link) + '" placeholder="https://doi.org/… 或 Zotero 条目"></div>'
+    + '</section>';
+
+  const chain = '<section class="card">'
+    + '<div class="block-head"><div><h3>这篇论文的逻辑链</h3><div class="sub">五个空填完，基本就抓住了它的“设计故事”</div></div></div>'
+    + chainRow('01', '选择什么材料 / 结构', 'material', p.chain.material)
+    + chainRow('02', '解决什么问题', 'problem', p.chain.problem)
+    + chainRow('03', '设计原理是什么', 'principle', p.chain.principle)
+    + chainRow('04', '实验如何证明', 'proof', p.chain.proof)
+    + chainRow('05', '能为综述提供什么证据', 'role', p.chain.role)
+    + '</section>';
+
+  const checklist = '<section class="card">'
+    + '<div class="block-head"><div><h3>精读进度</h3><div class="sub">六个环节，缺哪一步点哪一步</div></div><span class="badge gold">' + pr.pct + '%</span></div>'
+    + '<div class="mini-list">' + pr.steps.map(s =>
+      '<div class="mini-row" data-action="tab" data-tab="' + s.key + '">'
+      + '<span class="ok' + (s.done ? ' on' : '') + '">' + (s.done ? icon('check', 10) : '') + '</span>'
+      + '<span>' + s.label + '</span><span class="small muted">' + s.detail + '</span>'
+      + '<span class="go">进入 ›</span></div>').join('') + '</div></section>';
+
+  const recent = p.versions.length
+    ? '<section class="card"><div class="block-head"><div><h3>最近定稿</h3><div class="sub">每次“保存定稿”都会留一个版本</div></div>'
+    + '<button class="btn ghost sm" data-action="tab" data-tab="final">全部版本 ›</button></div>'
+    + '<div class="version"><span class="v-label">' + esc(p.versions[0].label) + '</span>'
+    + '<span class="v-time">' + fmtDateTime(p.versions[0].ts) + '</span></div></section>'
+    : '';
+
+  return meta + chain + checklist + recent;
+}
+
+function chainRow(no, label, key, val) {
+  return '<div class="chain-row"><span class="chain-no">' + no + '</span>'
+    + '<label>' + label + '</label>'
+    + '<input type="text" data-f="chain.' + key + '" value="' + esc(val) + '" placeholder="……"></div>';
+}
+
+/* ---------------- 第一步 ---------------- */
+function paperStep1(p) {
+  const qs = state.questions.step1;
+  return '<section class="card">'
+    + '<div class="block-head"><div><h3>只读 Abstract 与 Introduction</h3>'
+    + '<div class="sub">先不读 Methods。四个问题各写 1–3 句：先求准确，不求漂亮。</div></div>'
+    + '<span class="badge">' + qs.filter(q => String(p.step1[q.id] || '').trim()).length + '/4</span></div>'
+    + qs.map((q, i) => qBlock(i + 1, q, p.step1[q.id], 'step1.' + q.id)).join('')
+    + '<div class="divider"></div>'
+    + '<div class="field"><label>一句话总结 <em>读完立刻写</em></label>'
+    + '<textarea data-f="step1.summary" placeholder="如果只能用一句话向别人介绍这篇论文……">' + esc(p.step1.summary) + '</textarea></div>'
+    + '</section>';
+}
+
+function qBlock(no, q, val, path) {
+  return '<div class="q-block"><div class="q-head"><span class="q-num">' + no + '</span>'
+    + '<div><div class="q-label">' + esc(q.label) + '</div>'
+    + (q.hint ? '<div class="q-hint">' + esc(q.hint) + '</div>' : '')
+    + '</div></div>'
+    + '<div class="q-body"><textarea data-f="' + path + '" placeholder="' + esc(q.placeholder || '') + '">' + esc(val) + '</textarea></div></div>';
+}
+
+/* ---------------- 第二步 ---------------- */
+function paperStep2(p) {
+  const qs = state.questions.step2;
+  const items = p.figures.map((f, i) =>
+    '<div class="item-card">'
+    + '<div class="item-head"><span class="idx">图 ' + (i + 1) + '</span>'
+    + '<input type="text" class="figure-ref" data-arr="figures" data-idx="' + i + '" data-k="ref" value="' + esc(f.ref) + '" placeholder="Figure 2G">'
+    + '<select class="verdict-select" data-arr="figures" data-idx="' + i + '" data-k="verdict">'
+    + VERDICTS.map(v => '<option' + (f.verdict === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>'
+    + '<div class="grow"></div><div class="item-tools">'
+    + '<button class="icon-btn" data-action="move-figure" data-idx="' + i + '" data-dir="-1" title="上移">' + icon('up', 14) + '</button>'
+    + '<button class="icon-btn" data-action="move-figure" data-idx="' + i + '" data-dir="1" title="下移">' + icon('down', 14) + '</button>'
+    + '<button class="icon-btn danger" data-action="del-figure" data-idx="' + i + '" title="删除">' + icon('trash', 14) + '</button>'
+    + '</div></div>'
+    + qs.map(q => '<div class="field"><label>' + esc(q.label) + '</label>'
+      + '<textarea data-arr="figures" data-idx="' + i + '" data-k="' + q.id + '" placeholder="' + esc(q.hint || '') + '">' + esc(f[q.id]) + '</textarea></div>').join('')
+    + '</div>').join('');
+
+  return '<section class="card">'
+    + '<div class="block-head"><div><h3>先图后文：一张主图一张记录</h3>'
+    + '<div class="sub">只回答“变什么 / 测什么 / 说明什么 / 支撑哪个观点”，不要把图注抄一遍。</div></div>'
+    + '<button class="btn sm" data-action="add-figure">' + icon('plus', 13) + ' 加一张图</button></div>'
+    + (p.figures.length ? items : '<div class="empty" style="padding:30px"><p>还没有记录。打开论文的第一张主图，从 Figure 1 开始。</p>'
+      + '<button class="btn primary" data-action="add-figure">' + icon('plus', 14) + ' 加第一张图</button></div>')
+    + '</section>';
+}
+
+/* ---------------- 第三步 ---------------- */
+function paperStep3(p) {
+  const items = p.methods.map((m, i) =>
+    '<div class="item-card">'
+    + '<div class="item-head"><span class="idx">M' + (i + 1) + '</span>'
+    + '<input type="text" data-arr="methods" data-idx="' + i + '" data-k="name" value="' + esc(m.name) + '" placeholder="方法 / 参数 / 材料（如 静电纺丝）" style="flex:1">'
+    + '<select class="verdict-select" data-arr="methods" data-idx="' + i + '" data-k="depth">'
+    + DEPTHS.map(d => '<option' + (m.depth === d ? ' selected' : '') + '>' + d + '</option>').join('') + '</select>'
+    + '<div class="item-tools">'
+    + '<button class="icon-btn" data-action="move-method" data-idx="' + i + '" data-dir="-1" title="上移">' + icon('up', 14) + '</button>'
+    + '<button class="icon-btn" data-action="move-method" data-idx="' + i + '" data-dir="1" title="下移">' + icon('down', 14) + '</button>'
+    + '<button class="icon-btn danger" data-action="del-method" data-idx="' + i + '" title="删除">' + icon('trash', 14) + '</button>'
+    + '</div></div>'
+    + '<div class="field"><label>它解决什么 / 背后的设计策略 <em>不写操作步骤</em></label>'
+    + '<textarea data-arr="methods" data-idx="' + i + '" data-k="role" placeholder="例：决定纤维直径与孔隙，从而同时影响厚度、力学与透气">' + esc(m.role) + '</textarea></div>'
+    + '</div>').join('');
+
+  return '<section class="card">'
+    + '<div class="block-head"><div><h3>最后再看 Methods：只记设计策略</h3>'
+    + '<div class="sub">“非常值得”认真记；“值得了解”记一句；“暂时不必深入”留个名字即可。</div></div>'
+    + '<button class="btn sm" data-action="add-method">' + icon('plus', 13) + ' 加一项</button></div>'
+    + (p.methods.length ? items : '<div class="empty" style="padding:30px"><p>把这篇论文的关键工艺、参数、材料列出来，按重要度分级。</p>'
+      + '<button class="btn primary" data-action="add-method">' + icon('plus', 14) + ' 加第一项</button></div>')
+    + '<div class="quote" style="margin-top:16px">综述不是把每篇论文的制备方法重新写一遍，而是总结不同制备方法背后的设计策略。</div>'
+    + '</section>';
+}
+
+/* ---------------- 第四步 ---------------- */
+function paperStep4(p) {
+  const items = p.claims.map((c, i) =>
+    '<div class="item-card">'
+    + '<div class="item-head"><span class="idx">CLAIM ' + (i + 1) + '</span><div class="grow"></div><div class="item-tools">'
+    + '<button class="icon-btn" data-action="move-claim" data-idx="' + i + '" data-dir="-1" title="上移">' + icon('up', 14) + '</button>'
+    + '<button class="icon-btn" data-action="move-claim" data-idx="' + i + '" data-dir="1" title="下移">' + icon('down', 14) + '</button>'
+    + '<button class="icon-btn danger" data-action="del-claim" data-idx="' + i + '" title="删除">' + icon('trash', 14) + '</button>'
+    + '</div></div>'
+    + '<div class="field"><label>Claim <em>一句可以写进综述的话</em></label>'
+    + '<textarea data-arr="claims" data-idx="' + i + '" data-k="claim" placeholder="例：超薄多孔结构可以改善柔性电子设备的可呼吸性">' + esc(c.claim) + '</textarea></div>'
+    + '<div class="field"><label>证据 <em>数字 / 现象 / 对照实验</em></label>'
+    + '<textarea data-arr="claims" data-idx="' + i + '" data-k="evidence" placeholder="例：厚度约 10 μm；WVTR 1669.3 ± 23.5 g·m⁻²·day⁻¹">' + esc(c.evidence) + '</textarea></div>'
+    + '<div class="grid-3">'
+    + '<div class="field"><label>来源</label><input type="text" data-arr="claims" data-idx="' + i + '" data-k="source" value="' + esc(c.source) + '" placeholder="Figure 2G；Results"></div>'
+    + '<div class="field"><label>证据判断</label><select data-arr="claims" data-idx="' + i + '" data-k="verdict">'
+    + VERDICTS.map(v => '<option' + (c.verdict === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></div>'
+    + '<div class="field"><label>对应章节</label><select data-arr="claims" data-idx="' + i + '" data-k="section"><option value="">未归类</option>'
+    + sectionOptions(c.section) + '</select></div>'
+    + '</div></div>').join('');
+
+  return '<section class="card">'
+    + '<div class="block-head"><div><h3>把论文转化为论据</h3>'
+    + '<div class="sub">一条 Claim 配一组证据与出处。宁可只有一条，也不要写十条用不上的。</div></div>'
+    + '<button class="btn sm" data-action="add-claim">' + icon('plus', 13) + ' 加一条</button></div>'
+    + (p.claims.length ? items : '<div class="empty" style="padding:30px"><p>读完之后，用一句 Claim 说清“这篇论文能支撑我综述里的哪句话”。</p>'
+      + '<button class="btn primary" data-action="add-claim">' + icon('plus', 14) + ' 写第一条</button></div>')
+    + '</section>';
+}
+
+/* ---------------- 第五步 ---------------- */
+function paperStep5(p) {
+  return '<section class="card">'
+    + '<div class="block-head"><div><h3>这篇论文不能证明什么</h3>'
+    + '<div class="sub">不要只看作者的结论，要看实验究竟检查了什么。没检查的，先别当成已证明。</div></div></div>'
+    + '<div class="field"><label>不能证明什么 <em>逐条写</em></label>'
+    + '<textarea data-f="limits.cannot" style="min-height:110px" placeholder="例：WVTR 只说明水蒸气能穿过，不能证明防风、防水、汗液长期浸泡稳定性、皮肤炎症……">' + esc(p.limits.cannot) + '</textarea></div>'
+    + '<div class="grid-2">'
+    + '<div class="field"><label>实验与结论之间的缺口</label>'
+    + '<textarea data-f="limits.gap" placeholder="作者声称 A，但实验只测了 B……">' + esc(p.limits.gap) + '</textarea></div>'
+    + '<div class="field"><label>我的判断 / 引用时的边界</label>'
+    + '<textarea data-f="limits.judgment" placeholder="它能支撑什么、不能支撑什么，写综述时怎么限定语气">' + esc(p.limits.judgment) + '</textarea></div>'
+    + '</div>'
+    + '<div class="field"><label>还需要查证的问题 / 文献</label>'
+    + '<textarea data-f="limits.todo" placeholder="测试标准、对照数据、后续工作……">' + esc(p.limits.todo) + '</textarea></div>'
+    + '<div class="quote">判断规则：作者说自己证明了 A。回到实验，问一句“这个实验真的测试了 A 吗？”如果没有，就只能说“它证明了与 A 相关的某个环节”。</div>'
+    + '</section>';
+}
+
+/* ---------------- 定稿 ---------------- */
+function paperFinal(p) {
+  const pr = paperProgress(p);
+  const v = ui.versionView ? p.versions.find(x => x.id === ui.versionView) : null;
+
+  const editor = '<section class="card">'
+    + '<div class="block-head"><div><h3>定稿</h3><div class="sub">写给自己看的版本：这篇论文在综述里到底占什么位置</div></div>'
+    + '<span class="badge gold">' + pr.pct + '%</span></div>'
+    + '<div class="field"><label>一句话带走 <em>以后只记得住这一句</em></label>'
+    + '<input type="text" data-f="final.takeaway" value="' + esc(p.final.takeaway) + '" placeholder="例：结构工程可以把材料矛盾转化为设计参数。"></div>'
+    + '<div class="field"><label>综合评述</label>'
+    + '<textarea data-f="final.summary" style="min-height:130px" placeholder="它解决了什么、用什么策略、证据强度如何、在综述中怎么用……">' + esc(p.final.summary) + '</textarea></div>'
+    + '<div class="page-actions" style="justify-content:flex-start;margin-top:4px">'
+    + '<button class="btn primary" data-action="save-version">' + icon('check', 14) + ' 保存定稿（留档）</button>'
+    + '<button class="btn" data-action="export-paper">' + icon('download', 14) + ' 导出 Markdown</button>'
+    + '<button class="btn" data-action="print">' + icon('print', 14) + ' 打印 / 存 PDF</button>'
+    + '</div></section>';
+
+  const checklist = '<section class="card">'
+    + '<div class="block-head"><div><h3>定稿检查</h3><div class="sub">六项都完成，这篇才算读完</div></div></div>'
+    + '<div class="checklist">' + pr.steps.map(s =>
+      '<div class="check-item' + (s.done ? ' done' : '') + '" data-action="tab" data-tab="' + s.key + '">'
+      + '<span class="box">' + (s.done ? icon('check', 11) : '') + '</span>'
+      + '<span class="ci-label">' + s.label + '</span><span class="small muted">' + s.detail + '</span></div>').join('')
+    + '</div></section>';
+
+  const versions = '<section class="card">'
+    + '<div class="block-head"><div><h3>历史定稿</h3><div class="sub">每次保存都会新增一个版本，旧版本不会被覆盖</div></div>'
+    + '<span class="badge">' + p.versions.length + ' 个版本</span></div>'
+    + (p.versions.length ? p.versions.map(x =>
+      '<div class="version"><span class="v-label">' + esc(x.label) + '</span>'
+      + '<span class="v-time">' + fmtDateTime(x.ts) + '</span>'
+      + '<div class="v-tools">'
+      + '<button class="btn sm ghost" data-action="view-version" data-id="' + x.id + '">回看</button>'
+      + '<button class="btn sm ghost" data-action="restore-version" data-id="' + x.id + '">恢复</button>'
+      + '<button class="icon-btn danger" data-action="delete-version" data-id="' + x.id + '" title="删除该版本">' + icon('trash', 13) + '</button>'
+      + '</div></div>').join('')
+      : '<p class="small muted">还没有定稿版本。点上方“保存定稿”，就会留下第一个版本。</p>')
+    + '</section>';
+
+  const viewer = v
+    ? '<section class="card version-view"><div class="block-head"><div><h3>' + esc(v.label) + '</h3>'
+      + '<div class="sub">' + fmtDateTime(v.ts) + ' 的存档 · 只读</div></div>'
+      + '<div class="page-actions"><button class="btn sm" data-action="restore-version" data-id="' + v.id + '">恢复此版本</button>'
+      + '<button class="btn sm ghost" data-action="close-version">关闭</button></div></div>'
+      + '<pre class="version-pre">' + esc(paperMarkdown(v.data)) + '</pre></section>'
+    : '';
+
+  return editor + checklist + versions + viewer;
+}
+
+
+/* ============ 视图：阅读方法 / 大纲 / 证据 / 定稿库 / 设置 ============ */
+
+function viewGuide() {
+  return '<div class="page-head"><div><div class="eyebrow">Reading Protocol</div>'
+    + '<h2 class="page-title">五步精读法</h2>'
+    + '<p class="page-sub">固定动作、固定问题。把注意力留给内容，而不是“下一步该干什么”。</p></div>'
+    + '<div class="page-actions"><button class="btn" data-action="nav" data-view="outline">看大纲地图</button>'
+    + '<button class="btn primary" data-action="nav" data-view="library">开始精读</button></div></div>'
+
+    + '<section class="card protocol-card">'
+    + '<div class="protocol-flow"><span>阅读文献</span><i>→</i><span>制定大纲</span><i>→</i><span>组图</span><i>→</i><span>写作</span></div>'
+    + '<p class="protocol-note">平台负责“读完一篇就留下结构化的结果”；大纲与组图，建立在这些结果之上。</p>'
+    + '</section>'
+
+    + '<section class="card">'
+    + '<div class="guide-step"><div class="guide-num">01</div><div>'
+    + '<h3>初读：只看 Abstract 和 Introduction</h3>'
+    + '<div class="lead">先不读 Materials and Methods。目标是知道这篇论文“想解决什么”。</div>'
+    + '<div class="q-list">'
+    + '<div class="qi"><b>Q1</b><span>作者研究什么？</span></div>'
+    + '<div class="qi"><b>Q2</b><span>现有研究有什么问题？</span></div>'
+    + '<div class="qi"><b>Q3</b><span>作者提出什么策略？</span></div>'
+    + '<div class="qi"><b>Q4</b><span>作者声称实现了什么？</span></div>'
+    + '</div>'
+    + '<p>四个问题写不出来，说明摘要还没读懂——不是“读得不够多”，而是还没找到作者的论证起点。</p>'
+    + '<details class="note"><summary>看一个填好的例子（水凝胶皮肤传感器）</summary><div>'
+    + '<table class="example-table"><thead><tr><th>问题</th><th>这篇论文的答案</th></tr></thead><tbody>'
+    + '<tr><td>作者研究什么？</td><td>长期可穿戴的水凝胶皮肤传感器</td></tr>'
+    + '<tr><td>现有研究有什么问题？</td><td>超薄性、机械强度、透气性、黏附性和抗失水难以兼顾</td></tr>'
+    + '<tr><td>作者提出什么策略？</td><td>温度响应水凝胶 + PU 纳米网格增强</td></tr>'
+    + '<tr><td>作者声称实现了什么？</td><td>约 10 μm 厚度、透气、黏附、耐久、8 天连续监测</td></tr>'
+    + '</tbody></table></div></details>'
+    + '</div></div>'
+
+    + '<div class="guide-step"><div class="guide-num">02</div><div>'
+    + '<h3>读图：先图后文，一图一条</h3>'
+    + '<div class="lead">图是作者论证的主干。每张主图只留一条记录，不要抄图注。</div>'
+    + '<div class="q-list">'
+    + '<div class="qi"><b>Q1</b><span>作者改变了什么？</span></div>'
+    + '<div class="qi"><b>Q2</b><span>测量了什么？</span></div>'
+    + '<div class="qi"><b>Q3</b><span>结果说明什么？</span></div>'
+    + '<div class="qi"><b>Q4</b><span>这个结果能证明我的哪个观点？</span></div>'
+    + '</div>'
+    + '<p>优先看 Figure 1（概念 / 结构示意）、机理图、以及性能对比图。Q4 写不出来，就说明这张图和你的综述暂时没关系——可以跳过。</p>'
+    + '<p class="muted small">提示：在“读图”页给每条记录选一个证据判断（直接支持 / 部分支持 / 间接相关 / 不能支持 / 相矛盾），后面汇总时会自动按章节归类。</p>'
+    + '</div></div>'
+
+    + '<div class="guide-step"><div class="guide-num">03</div><div>'
+    + '<h3>方法：最后再看，只记设计策略</h3>'
+    + '<div class="lead">Methods 读的是“他们怎么做到的”，但写综述时用的是“他们为什么这样做”。</div>'
+    + '<div class="depth-row"><b>非常值得</b><span class="badge ok">认真记</span><span>直接影响性能、可复现性，或代表一类通用策略（如纳米网格密度）</span></div>'
+    + '<div class="depth-row"><b>值得了解</b><span class="badge mid">记一句</span><span>决定结构形成方式，但不必记住全部参数（如静电纺丝、浸涂）</span></div>'
+    + '<div class="depth-row"><b>暂时不必深入</b><span class="badge neutral">留名字</span><span>具体化学细节，知道它起什么作用即可（如硼砂交联、Na₂SO₄ 导电）</span></div>'
+    + '<div class="quote">综述不是把每篇论文的制备方法重新写一遍，而是总结不同制备方法背后的设计策略。</div>'
+    + '</div></div>'
+
+    + '<div class="guide-step"><div class="guide-num">04</div><div>'
+    + '<h3>论据化：把论文变成可引用的一句话</h3>'
+    + '<div class="lead">读完不是“我读过了”，而是“它能支撑我综述里的哪句话”。</div>'
+    + '<p><b>Claim</b>：一句可写进综述的断言。　<b>证据</b>：数字 / 现象 / 对照。　<b>来源</b>：精确到图号或章节。　<b>判断</b>：直接支持、部分支持，还是只能间接相关。</p>'
+    + '<details class="note"><summary>看两个 Claim 的写法</summary><div>'
+    + '<p><b>Claim 1：</b>超薄多孔结构可以改善柔性电子设备的可呼吸性。<br>证据：约 10 μm 厚度；WVTR 1669.3 ± 23.5 g·m⁻²·day⁻¹；作者将透气性归因于超薄厚度与多孔结构。来源：Figure 2G；Results。判断：直接支持。</p>'
+    + '<p><b>Claim 2：</b>纳米网格增强可以缓解超薄结构与机械稳健性之间的矛盾。<br>证据：PU 纳米网格增强；2.5 MPa 拉伸强度；1000 次循环拉伸。来源：Figure 3；Results。判断：直接支持。</p>'
+    + '</div></details>'
+    + '<p class="muted small">一篇论文留 1–3 条真正会用的论据就够了。论据太多，写作时反而无从取舍。</p>'
+    + '</div></div>'
+
+    + '<div class="guide-step"><div class="guide-num">05</div><div>'
+    + '<h3>边界：这篇论文不能证明什么</h3>'
+    + '<div class="lead">这一步决定你的综述是“文献摘要合集”，还是有判断的综述。</div>'
+    + '<p>作者说自己证明了 A。回到实验，只问一句：<b>这个实验真的测试了 A 吗？</b>如果它测的是 B，那它只能支撑与 A 相关的某个环节。</p>'
+    + '<details class="note"><summary>用一把伞理解这件事</summary><div>'
+    + '<p>我说：“这把伞非常结实，因为我把它放在桌上连续拍了 100 张照片，伞没有坏。”</p>'
+    + '<p>这能证明伞结实吗？不能。它只证明“伞在桌上被拍照时没有坏”。要证明结实，得测风、压力、反复开合。</p>'
+    + '<p>论文里也一样：作者测了 WVTR（水蒸气穿过材料的速度），这能直接证明“水蒸气能较容易地穿过这种水凝胶”；但不能证明“这种传感器已经解决了长期穿戴中所有与呼吸、舒适、安全有关的问题”。</p>'
+    + '</div></details>'
+    + '<p>所以在“边界”页写四件事：不能证明什么、实验与结论的缺口、引用时的边界、还需要查证什么。</p>'
+    + '</div></div>'
+    + '</section>'
+
+    + '<section class="card">'
+    + '<div class="block-head"><div><h3>每篇论文的五个逻辑问题</h3><div class="sub">与“概览”页的逻辑链一一对应</div></div></div>'
+    + '<div class="logic-list">'
+    + '<div><b>01</b><span>作者为什么选择这种材料和结构？</span></div>'
+    + '<div><b>02</b><span>它解决了什么问题？</span></div>'
+    + '<div><b>03</b><span>它的设计原理是什么？</span></div>'
+    + '<div><b>04</b><span>实验如何证明它有效？</span></div>'
+    + '<div><b>05</b><span>它能为我的综述提供什么证据？</span></div>'
+    + '</div></section>'
+
+    + '<section class="card">'
+    + '<div class="block-head"><div><h3>三条纪律</h3><div class="sub">比读得多更重要的，是留下什么</div></div></div>'
+    + '<div class="rules">'
+    + '<div><b>一</b><p>每篇只留 1–3 条真正会用的论据，其余记在“概览”的一句话总结里。</p></div>'
+    + '<div><b>二</b><p>记录“不能证明什么”，比记录“证明了什么”更能产生批判性。</p></div>'
+    + '<div><b>三</b><p>方法只记设计策略；具体步骤留给需要复现的人。</p></div>'
+    + '</div>'
+    + '<div class="quote" style="margin-top:14px">不要只看作者的结论，要看实验究竟检查了什么。实验没检查的事情，就先不要当成已经证明的事实。</div>'
+    + '</section>';
+}
+
+/* ---------------- 大纲地图 ---------------- */
+function viewOutline() {
+  const claimMap = {};
+  const paperMap = {};
+  state.papers.forEach(p => {
+    const k = p.meta.section || '';
+    (paperMap[k] = paperMap[k] || []).push(p);
+    p.claims.forEach(c => {
+      const ck = c.section || '';
+      (claimMap[ck] = claimMap[ck] || []).push({ c: c, p: p });
+    });
+  });
+  const totalClaims = state.papers.reduce((n, p) => n + p.claims.length, 0);
+
+  const sections = (state.outline || []).map(sec => {
+    const rows = sec.subs.map(sub => {
+      const claims = claimMap[sub.id] || [];
+      const papers = paperMap[sub.id] || [];
+      return '<div class="outline-sub">'
+        + '<div class="os-head"><span class="os-no">' + esc(sub.no) + '</span>'
+        + '<span class="os-title">' + esc(sub.title) + '</span>'
+        + '<span class="os-count">' + (claims.length ? claims.length + ' 条证据' : '暂无证据')
+        + (papers.length ? ' · ' + papers.length + ' 篇' : '') + '</span></div>'
+        + (claims.length ? '<div class="chips">' + claims.slice(0, 6).map(x =>
+          '<span class="chip" data-action="open-paper" data-id="' + x.p.id + '" data-tab="step4">'
+          + esc(x.c.claim.length > 46 ? x.c.claim.slice(0, 46) + '…' : x.c.claim) + '</span>').join('')
+          + (claims.length > 6 ? '<span class="chip more">+' + (claims.length - 6) + '</span>' : '') + '</div>' : '')
+        + '</div>';
+    }).join('');
+    const secClaims = sec.subs.reduce((n, s) => n + (claimMap[s.id] || []).length, 0);
+    return '<section class="card outline-sec">'
+      + '<div class="outline-head"><span class="outline-no">' + esc(sec.no) + '</span>'
+      + '<div class="outline-title"><h3>' + esc(sec.title) + '</h3>'
+      + '<p>' + sec.subs.length + ' 个小节 · ' + secClaims + ' 条证据</p></div>'
+      + (secClaims ? '<span class="badge">' + Math.round(secClaims / Math.max(totalClaims, 1) * 100) + '%</span>' : '<span class="small muted">待补充</span>') + '</div>'
+      + rows + '</section>';
+  }).join('');
+
+  const unassigned = claimMap[''] || [];
+  const unassignedHtml = unassigned.length
+    ? '<section class="card"><div class="block-head"><div><h3>未归类证据</h3><div class="sub">给这些 Claim 选一个章节，它们就会出现在对应位置</div></div>'
+    + '<span class="badge no">' + unassigned.length + ' 条</span></div><div class="chips">'
+    + unassigned.map(x => '<span class="chip" data-action="open-paper" data-id="' + x.p.id + '" data-tab="step4">'
+      + esc(x.c.claim.slice(0, 42) || '未写 Claim') + '</span>').join('') + '</div></section>'
+    : '';
+
+  return '<div class="page-head"><div><div class="eyebrow">Outline Map</div>'
+    + '<h2 class="page-title">大纲地图</h2>'
+    + '<p class="page-sub">6 章 26 小节，来自你的综述初步想法。每一条证据落在哪一节，一眼可见。</p></div>'
+    + '<div class="page-actions"><button class="btn" data-action="export-evidence">' + icon('download', 14) + ' 导出证据表</button></div></div>'
+    + sections + unassignedHtml;
+}
+
+/* ---------------- 证据总表 ---------------- */
+function evidenceRowsHTML(rows) {
+  if (!rows.length) {
+    return '<tr><td colspan="6"><div class="empty" style="border:none;background:transparent;padding:36px">'
+      + '<h3>还没有符合条件的证据</h3><p>在文献的“④ 论据”里写 Claim，并选好对应章节。</p></div></td></tr>';
+  }
+  return rows.map(r =>
+    '<tr data-action="open-paper" data-id="' + r.paper.id + '" data-tab="step4">'
+    + '<td class="small muted"><span title="' + esc(r.claim.section ? secLabel(r.claim.section) : '未归类') + '">' + esc(r.claim.section || '—') + '</span></td>'
+    + '<td class="claim">' + esc(r.claim.claim) + '</td>'
+    + '<td class="evidence">' + esc(r.claim.evidence) + '</td>'
+    + '<td class="small">' + esc(r.claim.source || '') + '</td>'
+    + '<td><span class="badge ' + (VERDICT_CLASS[r.claim.verdict] || 'neutral') + '">' + esc(r.claim.verdict || '') + '</span></td>'
+    + '<td class="small" title="' + esc(r.paper.meta.title) + '">' + esc((r.paper.meta.title || '').length > 26 ? (r.paper.meta.title || '').slice(0, 26) + '…' : (r.paper.meta.title || '')) + '</td>'
+    + '</tr>').join('');
+}
+
+function renderEvidenceBody() {
+  const rows = collectClaims(ui.evSection, ui.evVerdict, ui.evQuery);
+  const tb = document.getElementById('evBody');
+  if (tb) tb.innerHTML = evidenceRowsHTML(rows);
+  const c = document.getElementById('evCount');
+  if (c) c.textContent = rows.length + ' 条证据';
+}
+
+function viewEvidence() {
+  const rows = collectClaims(ui.evSection, ui.evVerdict, ui.evQuery);
+  return '<div class="page-head"><div><div class="eyebrow">Evidence Table</div>'
+    + '<h2 class="page-title">证据总表</h2>'
+    + '<p class="page-sub">所有论文的 Claim 按章节汇总。写作时直接从这张表里取句子和出处。</p></div>'
+    + '<div class="page-actions"><button class="btn" data-action="export-evidence">' + icon('download', 14) + ' 导出 Markdown</button></div></div>'
+    + '<div class="filter-bar">'
+    + '<select data-ui="evSection"><option value="all">全部章节</option>' + sectionOptions(ui.evSection) + '</select>'
+    + '<select data-ui="evVerdict"><option value="all">全部判断</option>' + VERDICTS.map(v => '<option' + (ui.evVerdict === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>'
+    + '<input id="evSearch" type="text" placeholder="搜索 Claim、证据或文献" value="' + esc(ui.evQuery) + '">'
+    + '<span id="evCount" class="small muted">' + rows.length + ' 条证据</span>'
+    + '</div>'
+    + '<div class="table-wrap"><table class="ev"><thead><tr>'
+    + '<th>章节</th><th>Claim</th><th>证据</th><th>来源</th><th>判断</th><th>文献</th>'
+    + '</tr></thead><tbody id="evBody">' + evidenceRowsHTML(rows) + '</tbody></table></div>';
+}
+
+/* ---------------- 定稿库 ---------------- */
+function viewArchive() {
+  const list = state.papers.filter(p => p.status === '已定稿' || p.versions.length)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+  const cards = list.map(p => {
+    const latest = p.versions[0];
+    const summary = p.final.summary || p.final.takeaway || '';
+    return '<article class="card archive-card">'
+      + '<div class="pcard-head"><span class="badge ok">已定稿</span>'
+      + '<span class="small muted">' + p.versions.length + ' 个版本 · ' + esc(relTime(p.updatedAt)) + '</span></div>'
+      + '<h3 class="pcard-title">' + esc(p.meta.title || '未命名文献') + '</h3>'
+      + '<p class="archive-sum">' + esc(summary.length > 150 ? summary.slice(0, 150) + '…' : (summary || '还没有写综合评述。')) + '</p>'
+      + '<div class="pcard-sec">' + esc(p.meta.section ? secLabel(p.meta.section) : '未归类章节') + '</div>'
+      + '<div class="page-actions" style="justify-content:flex-start;margin-top:12px">'
+      + '<button class="btn sm" data-action="open-paper" data-id="' + p.id + '" data-tab="final">打开</button>'
+      + '<button class="btn sm ghost" data-action="export-paper" data-id="' + p.id + '">导出</button>'
+      + (latest ? '<span class="small muted" style="align-self:center">最新：' + esc(latest.label) + '</span>' : '')
+      + '</div></article>';
+  }).join('');
+
+  return '<div class="page-head"><div><div class="eyebrow">Final Archive</div>'
+    + '<h2 class="page-title">定稿库</h2>'
+    + '<p class="page-sub">每次点击“保存定稿”都会留一个版本；这里保存每一次的最终成果。</p></div>'
+    + '<div class="page-actions"><button class="btn" data-action="export-all">' + icon('download', 14) + ' 导出全书</button></div></div>'
+    + (list.length ? '<div class="archive-grid">' + cards + '</div>'
+      : emptyBlock('还没有定稿', '在任意文献的“定稿”页点击“保存定稿”，这里就会留下一个可回看的版本。',
+        '<button class="btn primary" data-action="nav" data-view="library">去文献库</button>'));
+}
+
+/* ---------------- 设置 ---------------- */
+function viewSettings() {
+  const bytes = new Blob([JSON.stringify(state)]).size;
+  const kb = (bytes / 1024).toFixed(1);
+  const versions = state.papers.reduce((n, p) => n + p.versions.length, 0);
+
+  const qRow = (group, i, q, no) =>
+    '<div class="q-edit"><span class="q-num">' + no + '</span><div class="q-edit-fields">'
+    + '<input type="text" data-q="' + group + '.' + i + '.label" value="' + esc(q.label) + '" placeholder="问题">'
+    + '<input type="text" class="hint-input" data-q="' + group + '.' + i + '.hint" value="' + esc(q.hint || '') + '" placeholder="提示（可留空）">'
+    + '</div></div>';
+
+  const questions = '<section class="card">'
+    + '<div class="block-head"><div><h3>固定问题模板</h3><div class="sub">改一次，所有文献的对应空格都会跟着变，数据不会丢</div></div>'
+    + '<button class="btn sm ghost" data-action="reset-questions">恢复默认</button></div>'
+    + '<h4 class="sub-head">第一步 · 初读</h4>'
+    + state.questions.step1.map((q, i) => qRow('step1', i, q, i + 1)).join('')
+    + '<h4 class="sub-head" style="margin-top:18px">第二步 · 读图</h4>'
+    + state.questions.step2.map((q, i) => qRow('step2', i, q, i + 1)).join('')
+    + '</section>';
+
+  const data = '<section class="card">'
+    + '<div class="block-head"><div><h3>数据与备份</h3><div class="sub">数据存在这台电脑的浏览器里；换设备请用备份文件迁移</div></div></div>'
+    + '<div class="data-grid">'
+    + '<div class="data-item"><b>' + state.papers.length + '</b><span>文献</span></div>'
+    + '<div class="data-item"><b>' + state.papers.reduce((n, p) => n + p.claims.length, 0) + '</b><span>论据</span></div>'
+    + '<div class="data-item"><b>' + versions + '</b><span>历史版本</span></div>'
+    + '<div class="data-item"><b>' + kb + ' KB</b><span>占用空间</span></div>'
+    + '</div>'
+    + '<p class="hint-line">上次备份：' + (state.settings.lastBackup ? fmtDateTime(state.settings.lastBackup) : '从未备份') + '</p>'
+    + '<div class="page-actions" style="justify-content:flex-start">'
+    + '<button class="btn primary" data-action="backup">' + icon('download', 14) + ' 备份全部数据（JSON）</button>'
+    + '<button class="btn" data-action="import">' + icon('upload', 14) + ' 从备份恢复</button>'
+    + '<button class="btn" data-action="export-all">' + icon('download', 14) + ' 导出全书 Markdown</button>'
+    + '</div></section>';
+
+  const outline = '<section class="card">'
+    + '<div class="block-head"><div><h3>综述大纲</h3><div class="sub">来自《综述初步想法》，是 Claim 归类的依据</div></div>'
+    + '<span class="badge">6 章</span></div>'
+    + state.outline.map(sec => '<div class="settings-outline"><b>' + esc(sec.no) + '</b><span>' + esc(sec.title) + '</span>'
+      + '<span class="small muted">' + sec.subs.length + ' 小节</span></div>').join('')
+    + '</section>';
+
+  const about = '<section class="card">'
+    + '<div class="block-head"><div><h3>关于</h3><div class="sub">Breathable Systems · 文献精读工作台 v' + APP_VERSION + '</div></div></div>'
+    + '<p class="hint-line">离线单文件应用，不需要联网、不需要安装。全部数据保存在浏览器 localStorage；清除浏览器数据会一并清除，请定期备份。</p>'
+    + '<p class="hint-line" style="margin-top:6px">快捷键：Ctrl / Cmd + S 保存当前文献的定稿版本。</p>'
+    + '<div class="divider"></div>'
+    + '<div class="page-actions" style="justify-content:flex-start">'
+    + '<button class="btn danger sm" data-action="clear-demo">删除示例文献</button>'
+    + '<button class="btn danger sm" data-action="clear-all">清空全部数据</button>'
+    + '</div></section>';
+
+  return '<div class="page-head"><div><div class="eyebrow">Settings</div>'
+    + '<h2 class="page-title">设置</h2>'
+    + '<p class="page-sub">问题模板、数据备份与大纲。</p></div></div>'
+    + questions + data + outline + about;
+}
+
+/* ============ 交互 ============ */
+
+function closeSidebar() {
+  ui.sidebarOpen = false;
+  const sb = document.getElementById('sidebar');
+  if (sb) sb.classList.remove('open');
+}
+
+function applyPaperField(el) {
+  const p = currentPaper();
+  if (!p) return;
+  if (el.dataset.f) {
+    let v = el.value;
+    if (el.dataset.f === 'meta.tags') {
+      v = v.split(/[,，;；]/).map(s => s.trim()).filter(Boolean);
+    }
+    if (el.dataset.f === 'meta.title') {
+      const h = document.querySelector('.paper-title');
+      if (h) h.textContent = v.trim() || '未命名文献';
+    }
+    setPath(p, el.dataset.f, v);
+  } else if (el.dataset.arr) {
+    const arr = p[el.dataset.arr];
+    if (!arr || !arr[+el.dataset.idx]) return;
+    arr[+el.dataset.idx][el.dataset.k] = el.value;
+  }
+  p.updatedAt = Date.now();
+  saveSoon();
+  updateLiveProgress();
+  if (el.dataset.f === 'status' || el.dataset.f === 'meta.section' || el.dataset.f === 'meta.title') {
+    renderPaperList();
+  }
+  if (el.dataset.f === 'status' || el.dataset.f === 'meta.section') {
+    renderAll({ keepScroll: true });
+  }
+}
+
+function updateLiveProgress() {
+  if (ui.view !== 'paper') return;
+  const p = currentPaper();
+  if (!p) return;
+  const pr = paperProgress(p);
+  document.querySelectorAll('[data-prog-bar]').forEach(b => { b.style.width = pr.pct + '%'; });
+  document.querySelectorAll('[data-prog-text]').forEach(t => { t.textContent = pr.pct + '%'; });
+  document.querySelectorAll('[data-step-pill]').forEach(el => {
+    const s = pr.steps.find(x => x.key === el.dataset.stepPill);
+    if (!s) return;
+    el.classList.toggle('done', s.done);
+    el.textContent = s.label + ' · ' + s.detail;
+  });
+}
+
+function copyText(t) {
+  const done = () => toast('已复制 Markdown 到剪贴板');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(done).catch(() => fallbackCopy(t));
+  } else {
+    fallbackCopy(t);
+  }
+}
+function fallbackCopy(t) {
+  const ta = document.createElement('textarea');
+  ta.value = t;
+  ta.style.position = 'fixed';
+  ta.style.top = '-1000px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); toast('已复制 Markdown 到剪贴板'); }
+  catch (e) { toast('复制失败，请改用导出'); }
+  document.body.removeChild(ta);
+}
+
+function doAction(action, el) {
+  const p = currentPaper();
+  switch (action) {
+    case 'toggle-sidebar': {
+      ui.sidebarOpen = !ui.sidebarOpen;
+      document.getElementById('sidebar').classList.toggle('open', ui.sidebarOpen);
+      break;
+    }
+    case 'nav': {
+      ui.view = el.dataset.view;
+      ui.versionView = null;
+      closeSidebar();
+      renderAll();
+      window.scrollTo(0, 0);
+      break;
+    }
+    case 'open-paper': {
+      ui.paperId = el.dataset.id;
+      ui.view = 'paper';
+      ui.tab = el.dataset.tab || 'overview';
+      ui.versionView = null;
+      closeSidebar();
+      renderAll();
+      window.scrollTo(0, 0);
+      break;
+    }
+    case 'new-paper': {
+      const np = {
+        id: uid('p'), createdAt: Date.now(), updatedAt: Date.now(), status: '在读',
+        meta: { title: '', authors: '', journal: '', year: '', doi: '', link: '', tags: [], section: '' },
+        step1: {}, chain: {}, figures: [], methods: [], claims: [], limits: {}, final: {}, versions: []
+      };
+      state.papers.unshift(np);
+      ui.paperId = np.id; ui.view = 'paper'; ui.tab = 'overview'; ui.versionView = null;
+      saveNow();
+      renderAll();
+      window.scrollTo(0, 0);
+      setTimeout(() => {
+        const t = document.querySelector('[data-f="meta.title"]');
+        if (t) { t.focus(); t.select(); }
+      }, 60);
+      break;
+    }
+    case 'load-demo': {
+      if (state.papers.some(x => x.id === 'demo_hydrogel')) { toast('示例已经在文献库里了'); break; }
+      const d = buildDemoPaper();
+      state.papers.unshift(d);
+      ui.paperId = d.id; ui.view = 'paper'; ui.tab = 'overview'; ui.versionView = null;
+      saveNow(); renderAll();
+      window.scrollTo(0, 0);
+      toast('已载入示例，可以照着改，也可以随时删除');
+      break;
+    }
+    case 'delete-paper': {
+      if (!p) break;
+      if (!confirm('删除《' + (p.meta.title || '未命名文献') + '》？\n该文献的所有记录与历史版本都会消失，且不可撤销。')) break;
+      state.papers = state.papers.filter(x => x.id !== p.id);
+      ui.view = 'library'; ui.paperId = null;
+      saveNow(); renderAll(); window.scrollTo(0, 0);
+      toast('已删除');
+      break;
+    }
+    case 'tab': {
+      ui.tab = el.dataset.tab;
+      ui.versionView = null;
+      renderMain();
+      break;
+    }
+    case 'add-figure': {
+      if (!p) break;
+      p.figures.push({ id: uid('fig'), ref: '', change: '', measure: '', result: '', claim: '', verdict: '直接支持' });
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'del-figure': {
+      if (!p) break;
+      p.figures.splice(+el.dataset.idx, 1);
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'move-figure': moveItem(p, 'figures', +el.dataset.idx, +el.dataset.dir); break;
+    case 'add-method': {
+      if (!p) break;
+      p.methods.push({ id: uid('m'), name: '', depth: '值得了解', role: '' });
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'del-method': {
+      if (!p) break;
+      p.methods.splice(+el.dataset.idx, 1);
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'move-method': moveItem(p, 'methods', +el.dataset.idx, +el.dataset.dir); break;
+    case 'add-claim': {
+      if (!p) break;
+      p.claims.push({ id: uid('c'), claim: '', evidence: '', source: '', verdict: '直接支持', section: p.meta.section || '' });
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'del-claim': {
+      if (!p) break;
+      p.claims.splice(+el.dataset.idx, 1);
+      p.updatedAt = Date.now(); saveNow(); renderMain(); updateLiveProgress();
+      break;
+    }
+    case 'move-claim': moveItem(p, 'claims', +el.dataset.idx, +el.dataset.dir); break;
+
+    case 'save-version': {
+      if (!p) break;
+      saveVersion(p);
+      ui.versionView = null;
+      renderAll({ keepScroll: true });
+      break;
+    }
+    case 'view-version': {
+      ui.versionView = el.dataset.id;
+      ui.tab = 'final';
+      renderMain();
+      break;
+    }
+    case 'close-version': {
+      ui.versionView = null;
+      renderMain();
+      break;
+    }
+    case 'restore-version': {
+      if (!p) break;
+      const v = p.versions.find(x => x.id === el.dataset.id);
+      if (!v) break;
+      if (!confirm('恢复「' + v.label + '」（' + fmtDateTime(v.ts) + '）？\n当前内容会被替换，但历史版本仍全部保留。')) break;
+      const versions = p.versions;
+      const data = clone(v.data);
+      Object.keys(p).forEach(k => { if (k !== 'versions') delete p[k]; });
+      Object.assign(p, data);
+      p.versions = versions;
+      p.updatedAt = Date.now();
+      ui.versionView = null;
+      saveNow(); renderAll({ keepScroll: true });
+      toast('已恢复到 ' + v.label);
+      break;
+    }
+    case 'delete-version': {
+      if (!p) break;
+      const v = p.versions.find(x => x.id === el.dataset.id);
+      if (!v) break;
+      if (!confirm('删除版本「' + v.label + '」？')) break;
+      p.versions = p.versions.filter(x => x.id !== v.id);
+      if (ui.versionView === v.id) ui.versionView = null;
+      saveNow(); renderMain();
+      break;
+    }
+
+    case 'export-paper': {
+      const target = el.dataset.id ? state.papers.find(x => x.id === el.dataset.id) : p;
+      if (!target) break;
+      download(safeName(target.meta.title) + '.md', paperMarkdown(target), 'text/markdown');
+      toast('已导出 Markdown');
+      break;
+    }
+    case 'export-all': {
+      download('文献精读总表_' + fmtDateTime(Date.now()).slice(0, 10) + '.md', allMarkdown(), 'text/markdown');
+      toast('已导出全书 Markdown');
+      break;
+    }
+    case 'export-evidence': {
+      download('证据总表_' + fmtDateTime(Date.now()).slice(0, 10) + '.md', evidenceMarkdown(), 'text/markdown');
+      toast('已导出证据表');
+      break;
+    }
+    case 'backup': {
+      const payload = { app: 'breathable-systems-workbench', version: 1, exportedAt: Date.now(), data: state };
+      download('文献工作台备份_' + fmtDateTime(Date.now()).slice(0, 10) + '.json', JSON.stringify(payload, null, 2), 'application/json');
+      state.settings.lastBackup = Date.now();
+      saveNow(); renderMain();
+      toast('备份文件已生成');
+      break;
+    }
+    case 'import': {
+      document.getElementById('fileInput').click();
+      break;
+    }
+    case 'copy-md': {
+      if (!p) break;
+      copyText(paperMarkdown(p));
+      break;
+    }
+    case 'print': {
+      window.print();
+      break;
+    }
+    case 'reset-questions': {
+      if (!confirm('恢复默认的固定问题？已有的回答不会丢失，只是问题文字回到初始版本。')) break;
+      state.questions = clone(DEFAULT_QUESTIONS);
+      saveNow(); renderMain();
+      toast('已恢复默认问题');
+      break;
+    }
+    case 'clear-demo': {
+      if (!confirm('删除示例文献？你自己的数据不受影响。')) break;
+      state.papers = state.papers.filter(x => x.id !== 'demo_hydrogel');
+      if (ui.paperId === 'demo_hydrogel') { ui.paperId = null; ui.view = 'library'; }
+      saveNow(); renderAll();
+      toast('示例已删除');
+      break;
+    }
+    case 'clear-all': {
+      if (!confirm('清空全部文献、论据与历史版本？此操作不可撤销。建议先备份。')) break;
+      if (!confirm('再确认一次：真的清空全部数据？')) break;
+      state = defaultState();
+      state.papers = [];
+      ui.paperId = null; ui.view = 'library';
+      saveNow(); renderAll();
+      toast('已清空');
+      break;
+    }
+    default: break;
+  }
+}
+
+function moveItem(p, key, idx, dir) {
+  if (!p) return;
+  const arr = p[key];
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  const tmp = arr[idx];
+  arr[idx] = arr[j];
+  arr[j] = tmp;
+  p.updatedAt = Date.now();
+  saveNow(); renderMain(); updateLiveProgress();
+}
+
+function onInput(e) {
+  const el = e.target;
+  if (el.id === 'search') {
+    ui.search = el.value;
+    renderPaperList();
+    return;
+  }
+  if (el.id === 'evSearch') {
+    ui.evQuery = el.value;
+    renderEvidenceBody();
+    return;
+  }
+  if (el.dataset.q) {
+    const parts = el.dataset.q.split('.');
+    const group = state.questions[parts[0]];
+    const item = group && group[+parts[1]];
+    if (item) { item[parts[2]] = el.value; saveSoon(); }
+    return;
+  }
+  if (el.dataset.f || el.dataset.arr) {
+    applyPaperField(el);
+    autoGrow(el);
+  }
+}
+
+function onChange(e) {
+  const el = e.target;
+  if (el.dataset.ui === 'evSection') {
+    ui.evSection = el.value;
+    renderEvidenceBody();
+    return;
+  }
+  if (el.dataset.ui === 'evVerdict') {
+    ui.evVerdict = el.value;
+    renderEvidenceBody();
+    return;
+  }
+  if (el.dataset.f || el.dataset.arr) {
+    applyPaperField(el);
+  }
+}
+
+function onImportFile(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const data = parsed.data || parsed;
+      if (!data || !Array.isArray(data.papers)) throw new Error('文件里没有找到文献数据');
+      if (!confirm('从备份恢复会覆盖当前全部数据（当前 ' + state.papers.length + ' 篇，备份 ' + data.papers.length + ' 篇）。\n建议先备份当前数据。继续？')) return;
+      state = migrate(data);
+      ui.paperId = null; ui.view = 'library'; ui.versionView = null;
+      saveNow(); renderAll();
+      toast('恢复完成，共 ' + state.papers.length + ' 篇文献');
+    } catch (err) {
+      alert('导入失败：' + err.message);
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+  e.target.value = '';
+}
+
+function init() {
+  state = loadState();
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-action]');
+    if (el) { e.preventDefault(); doAction(el.dataset.action, el); return; }
+    if (ui.sidebarOpen && !e.target.closest('#sidebar') && !e.target.closest('[data-action="toggle-sidebar"]')) {
+      closeSidebar();
+    }
+  });
+  document.addEventListener('input', onInput);
+  document.addEventListener('change', onChange);
+  document.getElementById('fileInput').addEventListener('change', onImportFile);
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 's') {
+      if (ui.view === 'paper' && currentPaper()) {
+        e.preventDefault();
+        saveVersion(currentPaper());
+        renderAll({ keepScroll: true });
+      }
+    }
+  });
+  renderAll();
+  updateSaveLabel('本地自动保存');
+}
+
+init();
+
+</script>
+</body>
+</html>
